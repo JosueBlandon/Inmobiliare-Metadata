@@ -10,6 +10,7 @@ public class extensionCotizacion {
     
     public Urbanizacion__c urbanizacion {get;set;} 
     public String urbanizacionSeleccionada {get;set;}
+    public String urbanizacionSeleccionadaModelo {get;set;}
     public List<Urbanizacion__c> listaUrbanizaciones {get;set;}
     public List<SelectOption> opcionesUrbanizacion {get;set;}
     
@@ -161,8 +162,8 @@ public class extensionCotizacion {
                 listaPropiedad.add(propiedadSeleccionada);
                 urbanizacionSeleccionada = propiedadSeleccionada.implan.Lote__r.CI_Manzana__r.Etapa__c;
                 
-                //urbanizacionSeleccionada = propiedadSeleccionada.implan.Lote__r.Modelo__c;
-                //urbanizacionSeleccionada = propiedadSeleccionada.implan.Lote__r.Modelo__c;
+                urbanizacionSeleccionadaModelo = propiedadSeleccionada.implan.Modelo__c;
+                //urbanizacionSeleccionada = propiedadSeleccionada.implan.Modelo__c;
                 
                 getvaluesFilterPromo();
                 getvaluesFilterAdi();
@@ -477,6 +478,8 @@ public class extensionCotizacion {
             listaPropiedad=new List<propiedad>();
             listaPropiedad.add(propiedadSeleccionada);
             urbanizacionSeleccionada = propiedadSeleccionada.implan.Lote__r.CI_Manzana__r.Etapa__c;
+
+            urbanizacionSeleccionadaModelo = propiedadSeleccionada.implan.Modelo__c;
             
             getvaluesFilterPromo();
             getvaluesFilterAdi();
@@ -698,11 +701,12 @@ public class extensionCotizacion {
         
         string query = 'Select id, name, Etapa__c, Modelo__c, Nivel__c, Etapa__r.Name, Etapa__r.Codigo_Empresa__c, Promocion__c, Promocion__r.Nivel__c, Promocion__r.Name, Promocion__r.Estado__c, promocion__r.Codigo__c, Promocion__r.Prescindible__c, Vigencia_Inicio__c, Vigencia_Fin__c, Valor__c '+
             'FROM Promocion_Agregada__c '+
-            'WHERE valor__c!=0 and Etapa__c=\''+urbanizacionSeleccionada+'\' and Vigencia_Inicio__c <= TODAY and Vigencia_Fin__c >= TODAY';
+            'WHERE valor__c!=0 and Etapa__c=\''+urbanizacionSeleccionada+'\' and Vigencia_Inicio__c <= TODAY and Vigencia_Fin__c >= TODAY ORDER BY Promocion__r.Name';
                
         List<string> listaPromocionIds = new List<string>();
         List<string> listaEtapasCodigos = new List<string>();
         valuesFilterAdi = Database.query(query);
+        System.debug('Query: '+valuesFilterAdi);
         listaAdicionales = new List<PromocionFeedResponse>();
         
         set<Id> idValues = new set<Id>();
@@ -713,26 +717,36 @@ public class extensionCotizacion {
             idValues2.add(item.Nivel__c);
             empresas.add(item.Etapa__r.Codigo_Empresa__c);
         }
+        System.debug('Promociones agregadas idValues2: '+idValues2);
         System.debug('Promociones agregadas Empresas: '+empresas);
         List<Detalle_Promocion_por_Modelo__c> listdetProMod = new List<Detalle_Promocion_por_Modelo__c>();
-        listdetProMod = [Select Id, Modelo__c, Nivel__c from Detalle_Promocion_por_Modelo__c Where Modelo__c In : idValues and Nivel__c In : idValues2 and Empresa__c In : empresas];
+        listdetProMod = [Select Id, Modelo__c, Nivel__c from Detalle_Promocion_por_Modelo__c Where Modelo__c =: urbanizacionSeleccionadaModelo and Nivel__c In : idValues2 and Empresa__c In : empresas];
         system.debug('listdetProMod: '+listdetProMod);
         
         for(Promocion_Agregada__c item : valuesFilterAdi) {
             if(listdetProMod.size() > 0) {
+                if(item.Promocion__r.Nivel__c == false) {
+                    System.System.debug('Check False: '+item.promocion__c);
+                    listaAdicionales.add(new PromocionFeedResponse(item));
+                }
+                System.System.debug('Encontramos detalles de promoción por modelo');
                 for(Detalle_Promocion_por_Modelo__c detPromoMod : listdetProMod) {
-                    System.debug('Valores a comparar: '+detPromoMod.Modelo__c+'--'+item.Modelo__c+'---'+detPromoMod.Nivel__c+'---'+item.Nivel__c);
-                    if(item.Promocion__r.Nivel__c == false || (item.Promocion__r.Nivel__c == true && detPromoMod.Modelo__c == item.Modelo__c && detPromoMod.Nivel__c == item.Nivel__c)){
+                    System.debug('Valores a comparar: '+detPromoMod.Id+'---'+detPromoMod.Modelo__c+'--'+item.Modelo__c+'---'+detPromoMod.Nivel__c+'---'+item.Nivel__c);
+                    if(item.Promocion__r.Nivel__c == true && detPromoMod.Modelo__c == item.Modelo__c && detPromoMod.Nivel__c == item.Nivel__c){                      
                         listaAdicionales.add(new PromocionFeedResponse(item));
                     }
                 } 
             } else {
+                System.debug('No encontamos detalles de promoción por modelo');
                 if(item.Promocion__r.Nivel__c == false) {
             		listaAdicionales.add(new PromocionFeedResponse(item));
                 }
             }
             listaPromocionIds.add(''+item.promocion__r.Codigo__c);
         }
+
+        System.debug('Todos los registros: '+listaAdicionales);
+        System.debug('Todos los registros: '+listaAdicionales.size());
         
         If(Cotizacion.Id != null){
             List<Detalle_Promocion__c> listaDetallesPromocion = [SELECT Id, Promocion__c FROM Detalle_Promocion__c WHERE Cotizacion__c = :Cotizacion.Id];
