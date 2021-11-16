@@ -1,0 +1,610 @@
+<apex:page standardController="Cotizacion__c" extensions="extensionCotizacion" lightningStylesheets="true" docType="html-5.0" showheader="false" sidebar="false">
+
+<html>
+
+    <head>
+    
+    <apex:slds />
+    
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"/>
+    <link rel="stylesheet" href="{!Urlfor($Resource.Resource,'css/style.css')}" />
+    <apex:stylesheet value="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/ui-lightness/jquery-ui.css"/>
+        
+    <style type="text/css">
+        .custPopup{
+            background-color: white;
+            border-width: 2px;
+            border-style: solid;
+            z-index: 999;
+            left: 50%;
+            padding:10px;
+            position: absolute;
+            /* These are the 3 css properties you will need to change so the popup 
+            displays in the center of the screen. First set the width. Then set 
+            margin-left to negative half of what the width is. You can add 
+            the height property for a fixed size pop up if you want.*/
+            width: 90%;
+            margin-left: -45%;
+            top:10%;
+        }
+        .popupBackground{
+            background-color:black;
+            opacity: 0.20;
+            filter: alpha(opacity = 20);
+            position: absolute;
+            width: 100%;
+            height: 200%;
+            top: 0;
+            left: 0;
+            z-index: 998;
+        }
+        div.hideCurrDate span.dateInput span.dateFormat{
+            display:none;
+        }
+        
+        html {
+            overflow-y: scroll;
+        }
+    </style>
+    
+    <script>
+        $j = jQuery.noConflict();
+        
+        var fileldId;
+        function oncfoucs(){
+            debugger;
+           fileldId = $(document.activeElement); 
+        }
+        function focusComplete(){
+            fileldId.focus();
+        }
+    
+        function stopRKey(evt) {
+            var evt = (evt) ? evt : ((event) ? event : null);
+            var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+            if ((evt.keyCode == 13) && (node.type=="text")) {return false;}
+        }
+        
+        document.onkeypress = stopRKey;
+    
+        function toggleFinanciamientoEntrada(){
+            var input1 = document.getElementById('TabEntrada');
+            input1.classList.toggle("slds-is-active");
+            var input2 = document.getElementById('TabSaldo');
+            input2.classList.toggle("slds-is-active");
+            
+            var input3 = document.getElementById('slds-vertical-tabs-0');
+            var input4 = document.getElementById('slds-vertical-tabs-1');
+            input3.classList.toggle("slds-hide");
+            input4.classList.toggle("slds-hide");
+            input3.classList.toggle("slds-show");
+            input4.classList.toggle("slds-show");
+        }
+    
+        function toggleVerFinanciamiento(){
+            var input1 = document.getElementById('divFondoFinanciamiento');
+            input1.classList.toggle("slds-backdrop_open");
+            var input2 = document.getElementById('divModalFinanciamiento');
+            input2.classList.toggle("slds-fade-in-open");
+        }
+        
+        function toggleVerAdicionales(){
+            var input1 = document.getElementById('divFondoFinanciamiento');
+            input1.classList.toggle("slds-backdrop_open");
+            var input2 = document.getElementById('divModalAdicionales');
+            input2.classList.toggle("slds-fade-in-open");
+        }
+        
+        function toggleVerContratoAnterior(){
+            var input1 = document.getElementById('divFondoFinanciamiento');
+            input1.classList.toggle("slds-backdrop_open");
+            var input2 = document.getElementById('divModalContratoAnterior');
+            input2.classList.toggle("slds-fade-in-open");
+        }
+    
+        function toggleVerPromociones(){
+            var input1 = document.getElementById('divFondoFinanciamiento');
+            input1.classList.toggle("slds-backdrop_open");
+            var input2 = document.getElementById('divModalPromociones');
+            input2.classList.toggle("slds-fade-in-open");
+        }
+        
+        function toggleVerArticulos(){
+            var input1 = document.getElementById('divFondoFinanciamiento');
+            input1.classList.toggle("slds-backdrop_open");
+            var input2 = document.getElementById('divModalArticulos');
+            input2.classList.toggle("slds-fade-in-open");
+        }
+        
+        function toggleVerCombos(){
+            var input1 = document.getElementById('divFondoFinanciamiento');
+            input1.classList.toggle("slds-backdrop_open");
+            var input2 = document.getElementById('divModalCombos');
+            input2.classList.toggle("slds-fade-in-open");
+        }
+        
+        function highlightRow(elem){
+            seleccionPropiedadMethod(elem);
+            var valor = "propiedadRow-"+elem;
+            var input = document.getElementById(valor);
+            input.classList.toggle("slds-is-selected");
+        }
+        
+        function highlighRowLote(elem){
+            seleccionPropiedadLoteMethod(elem);
+            var valor = "propiedadRow-"+elem;
+            var input = document.getElementById(valor);
+            input.classList.toggle("slds-is-selected");
+        }
+    
+        function highlightRowAfter(elem){
+            var valor = "propiedadRow-"+elem;
+            var input = document.getElementById(valor);
+            input.classList.toggle("slds-is-selected");
+        }
+    
+        function toggleFiltros() {
+            name = "slds-is-open";
+            var element = document.getElementById("PanelFiltros");
+            var element2 = document.getElementById("buttonFiltros");
+            
+            if (element.classList) { 
+                element.classList.toggle("slds-is-open");
+                element2.classList.toggle("slds-is-selected");
+            } else {
+                // For IE9
+                var classes = element.className.split(" ");
+                var i = classes.indexOf("slds-is-open");
+            
+                if (i >= 0) 
+                    classes.splice(i, 1);
+                else 
+                    classes.push("slds-is-open");
+                    element.className = classes.join(" "); 
+            }
+            return false;
+        }
+    
+        function toggleOpenSideMenuButton(){
+            var input1 = document.getElementById('divOpenSideMenu');
+            input1.classList.toggle("slds-is-open");
+        }
+        
+        function checkDecimal(elem){
+            return ( event.ctrlKey || event.altKey 
+                    || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false) 
+                    || (95<event.keyCode && event.keyCode<106)
+                    || (event.keyCode==8) || (event.keyCode==9) 
+                    || (event.keyCode>34 && event.keyCode<40) 
+                    || (event.keyCode==46)
+                        || (event.keyCode==190)
+                        || (event.keyCode==110)
+                        || (event.keyCode==188));
+        }
+    </script>
+    
+    </head>
+  
+    <body>
+    
+    
+    <apex:actionStatus id="status">
+        <apex:facet name="start">
+            <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.25; z-index: 1000; background-color: black;">
+                &nbsp;
+            </div>
+            
+            <div role="status" class="slds-spinner slds-spinner_large">
+                <span class="slds-assistive-text">Por Favor Espere...</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </apex:facet>
+    </apex:actionStatus>
+    
+    <apex:form id="theForm">
+        <div class="slds-scope">
+            <apex:outputPanel id="PanelFinanciamiento">
+                <div class="slds-page-header">
+                    <div class="slds-grid">
+                        <div class="slds-col slds-has-flexi-truncate">
+                            <div class="slds-media slds-no-space slds-grow">
+                                <div class="slds-media__figure">
+                                    <span class="slds-icon_container slds-icon-standard-opportunity" title="">
+                                        <svg class="slds-icon" aria-hidden="true">
+                                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#opportunity')}" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div class="slds-media__body">
+                                    <nav>
+                                        <ol class="slds-breadcrumb slds-line-height_reset">
+                                            <li class="slds-breadcrumb__item">
+                                                <span>Edición de Financiamiento</span>
+                                            </li>
+                                        </ol>
+                                    </nav>
+                                    <h1 class="slds-page-header__title slds-m-right_small slds-align-middle slds-truncate" title="Cotización para ">
+                                        
+                                    </h1>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                            <div class="slds-button-group" role="group">
+                                <apex:commandButton styleclass="slds-button slds-button_brand" style="border-radius: 5px;" value="Confirmar" action="{!redirectFromFinanciamiento}" / >
+                                
+                                <button class="slds-button slds-button_neutral" onclick="window.print();return false;">Imprimir</button>
+                                
+                                <apex:commandButton styleclass="slds-button slds-button_neutral" style="border-radius: 5px;" value="Cancelar" action="{!Cancel}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    
+                    <apex:messages styleClass="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" />
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <div class="slds-form slds-form_compound">
+                                <fieldset class="slds-form-element">
+                                    <div class="slds-form-element__group">
+                                        <div class="slds-form-element__row">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <label class="slds-form-element__label" for="input-01">Precio Neto</label>
+                                                <apex:outputText value="{0, number, Currency}" label="Precio Venta" styleclass="slds-input" html-readonly="">
+                                                    <apex:param value="{!MontoCotizado}"></apex:param>
+                                                    <apex:actionSupport event="onchange" action="{!actualizaPrecioLista}" status="status" reRender="theForm"/>
+                                                </apex:outputText>
+                                            </div>
+                                        </div>
+                                        <div class="slds-form-element__row">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <label class="slds-form-element__label" for="input-01">Entrada</label>
+                                                <apex:outputText value="{0, number, Currency}" label="Precio Venta" styleclass="slds-input" html-readonly="">
+                                                    <apex:param value="{!Entrada}"></apex:param>
+                                                    <apex:actionSupport event="onchange" action="{!actualizaPrecioLista}" status="status" reRender="theForm"/>
+                                                </apex:outputText>
+                                            </div>
+                                        </div>
+                                        <div class="slds-form-element__row">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <label class="slds-form-element__label" for="input-01">Saldo</label>
+                                                <apex:outputText value="{0, number, Currency}" label="Precio Venta" styleclass="slds-input" html-readonly="">
+                                                    <apex:param value="{!Saldo}"></apex:param>
+                                                    <apex:actionSupport event="onchange" action="{!actualizaPrecioLista}" status="status" reRender="theForm"/>
+                                                </apex:outputText>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset> 
+                            </div>
+                        </div>
+                        <div class="slds-col">
+                            <div class="slds-form slds-form_compound">
+                                <fieldset class="slds-form-element">
+                                    <div class="slds-form-element__group">
+                                        <div class="slds-form-element__row">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <label class="slds-form-element__label" for="input-01">Descuento</label>
+                                                <apex:inputText value="{!descuento}" label="Descuento" styleclass="slds-input" onkeydown="return checkDecimal(this);" rendered="{!Oportunidad.Estado_de_Aprobacion__c!='Aprobado'}">
+                                                    <apex:actionSupport event="onchange" action="{!actualizarDescuento}" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                </apex:inputText>
+                                                <apex:outputText value="{0, number, Currency}" rendered="{!Oportunidad.Estado_de_Aprobacion__c=='Aprobado'}">
+                                                    <apex:param value="{!descuento}" />
+                                                </apex:outputText>
+                                            </div>
+                                        </div>
+                                        <div class="slds-form-element__row">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <label class="slds-form-element__label" for="input-02">Porcentaje</label>
+                                                <apex:inputText value="{!descuentoPor}" label="Porcentaje Descuento" styleclass="slds-input" onkeydown="return checkDecimal(this);" rendered="{!Oportunidad.Estado_de_Aprobacion__c!='Aprobado'}">
+                                                    <apex:actionSupport event="onchange" action="{!actualizarDescuentoPor}" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                </apex:inputText>
+                                                <apex:outputText value="{0, number, Currency}" rendered="{!Oportunidad.Estado_de_Aprobacion__c=='Aprobado'}">
+                                                    <apex:param value="{!descuentoPor}" />
+                                                </apex:outputText>
+                                            </div>
+                                        </div>
+                                        <div class="slds-form-element__row">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <label class="slds-form-element__label" for="input-02">Ingresa Preferencial</label>
+                                                <!--apex:inputCheckbox value="{!IngresaPreferencial}"/-->
+                                                <apex:inputField value="{!Cotizacion__c.Ingresa_Preferencial__c}" rendered="{!Oportunidad.Estado_de_Aprobacion__c!='Aprobado'}"/>
+                                                <apex:outputField value="{!Cotizacion__c.Ingresa_Preferencial__c}" rendered="{!Oportunidad.Estado_de_Aprobacion__c=='Aprobado'}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="slds-col">
+                            <!-- apex:outputPanel styleclass="slds-form slds-form_compound" rendered="{!descuentoMaximoPor>0}">
+                                <fieldset class="slds-form-element">
+                                    <div class="slds-form-element__group">
+                                        <div class="slds-form-element__row">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <label class="slds-form-element__label" for="input-04">Monto</label>
+                                                <apex:outputText value="{0, number, Currency}" label="Descuento" styleclass="slds-input" html-readonly="">
+                                                    <apex:param value="{!descuentoMaximo}"/>
+                                                    <apex:actionSupport event="onchange" action="{!actualizarMonto}" status="status" reRender="theForm"/>
+                                                </apex:outputText>
+                                            </div>
+                                        </div>
+                                        <div class="slds-form-element__row">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <label class="slds-form-element__label" for="input-05">Porcentaje</label>
+                                                <apex:outputText value="{!descuentoMaximoPor}" label="Porcentaje Descuentro" styleclass="slds-input" html-readonly="">
+                                                    <apex:actionSupport event="onchange" action="{!actualizaPrecioLista}" status="status" reRender="theForm"/>
+                                                </apex:outputText>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </apex:outputPanel>
+                        </div>
+                        <div class="slds-col">
+                            <div class="slds-form slds-form_compound">
+                                <fieldset class="slds-form-element">
+                                    <div class="slds-form-element__group">
+                                        <div class="slds-form-element__row">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <label class="slds-form-element__label" for="input-01">Tipo de Financiamiento</label>
+                                                <!-- apex:selectList value="{!tipoFinanciamiento}" multiselect="false" size="1" label="Tipo Financiamiento" styleClass="slds-input">
+                                                    <apex:selectOption itemLabel="Crédito Directo" itemValue="CD"></apex:selectOption>
+                                                    <apex:selectOption itemLabel="Contado" itemValue="Contado"></apex:selectOption>
+                                                    <apex:selectOption itemLabel="Crédito Hipotecario" itemValue="CH"></apex:selectOption>
+                                                    <apex:actionSupport event="onchange" action="{!changeFinanciamiento}" reRender="theForm" status="status" oncomplete="toggleVerFinanciamiento();"/>
+                                                </apex:selectList -->
+                                            </div>
+                                        </div>
+                                        <!-- apex:outputPanel styleclass="slds-form-element__row" rendered="{!TipoFinanciamiento=='CH'}">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <label class="slds-form-element__label" for="input-06">Institución Financiera</label>
+                                                <apex:inputField value="{!cotizacion.Institucion_Financiera__c}" styleclass="slds-input">
+                                                    <apex:actionSupport event="onchange" action="{!changeInstitucionFinanciera}" reRender="theForm" status="status" oncomplete="toggleVerFinanciamiento();"/>
+                                                </apex:inputField>
+                                            </div>
+                                        </apex:outputPanel>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabs! ------------------------------------------------------------------------------------------------------>
+                    <div class="slds-vertical-tabs">
+                        <ul class="slds-vertical-tabs__nav" role="tablist" aria-orientation="vertical">
+                            <li class="slds-vertical-tabs__nav-item slds-is-active" title="Tab 1" role="presentation" id="TabEntrada">
+                                <a class="slds-vertical-tabs__link" href="javascript:toggleFinanciamientoEntrada();" role="tab" tabindex="0" aria-selected="true" aria-controls="slds-vertical-tabs-0" id="slds-vertical-tabs-0__nav">
+                                    Entrada
+                                </a>
+                            </li>
+                            <li class="slds-vertical-tabs__nav-item" title="Tab 2" role="presentation" id="TabSaldo">
+                                <a class="slds-vertical-tabs__link" href="javascript:toggleFinanciamientoEntrada();" role="tab" tabindex="-1" aria-selected="false" aria-controls="slds-vertical-tabs-1" id="slds-vertical-tabs-1__nav">
+                                    Saldo
+                                </a>
+                            </li>
+                        </ul>
+                        
+                        <div class="slds-vertical-tabs__content slds-show" id="slds-vertical-tabs-0" role="tabpanel" aria-labelledby="slds-vertical-tabs-0__nav">
+                            <div class="slds-text-longform">
+                                <h3 class="slds-text-heading_medium">Datos de Entrada</h3>
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col">
+                                        <div class="slds-form slds-form_compound">
+                                            <fieldset class="slds-form-element">
+                                                <legend class="slds-form-element__label slds-text-title_caps">Valor de Entrada</legend>
+                                                <div class="slds-form-element__group">
+                                                    <div class="slds-form-element__row">
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-01">Monto</label>
+                                                            <apex:inputText value="{!Entrada}" label="Monto Entrada" styleclass="slds-input" html-type="number" rendered="{!TipoFinanciamiento!='Contado'}" onkeydown="return checkDecimal(this);">
+                                                                <apex:actionSupport event="onchange" action="{!recalcularValorEntrada}" status="status" reRender="resumenVentasDiv,PanelFinanciamiento"/>
+                                                            </apex:inputText>
+                                                            <apex:outputText value="{0, number, Currency}" label="Descuento" styleclass="slds-input" html-readonly="" rendered="{!TipoFinanciamiento=='Contado'}">
+                                                                <apex:param value="{!Entrada}"/>
+                                                                <apex:actionSupport event="onchange" action="{!actualizarMonto}" status="status" reRender="theForm"/>
+                                                            </apex:outputText>
+                                                        </div>
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-02">Porcentaje(%)</label>
+                                                            <apex:inputText value="{!EntradaPor}" label="Entrada %" styleClass="slds-input" rendered="{!TipoFinanciamiento!='Contado'}" onkeydown="return checkDecimal(this);">
+                                                                <apex:actionSupport event="onchange" action="{!recalcularPorcentajeEntrada}" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                            </apex:inputText>
+                                                            <apex:outputText value="{!EntradaPor}" label="Descuento" styleclass="slds-input" html-readonly="" rendered="{!TipoFinanciamiento=='Contado'}">
+                                                            </apex:outputText>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            <fieldset class="slds-form-element">
+                                                <legend class="slds-form-element__label slds-text-title_caps">Cuota Inicial</legend>
+                                                <div class="slds-form-element__group">
+                                                    <div class="slds-form-element__row">
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-04">Monto</label>
+                                                            <apex:inputText value="{!montoCuotaPrima}" label="Cuota Inicial %" styleclass="slds-input" onkeydown="return checkDecimal(this);">
+                                                                <apex:actionSupport action="{!recalcularMontoCuotaPrima}" event="onchange" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                            </apex:inputText>
+                                                        </div>
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-05">Porcentaje(%)</label>
+                                                            <apex:inputText value="{!porcentajeCuotaPrima}" label="Cuota Inicial %" styleClass="slds-input" onkeydown="return checkDecimal(this);">
+                                                                <apex:actionSupport action="{!recalcularPorcentajeCuotaPrima}" event="onchange" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                            </apex:inputText>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-form-element__row">
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-06">Fecha de Entrada</label>
+                                                            <div class="hideCurrDate">
+                                                                <apex:inputField value="{!CuotaFecha.Cuo.Fecha__c}" label="Fecha Inicio Entrada" styleClass="slds-input">
+                                                                    <apex:actionSupport action="{!RecalcularCuotas}" event="onchange" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                                </apex:inputField>
+                                                            </div>
+                                                        </div>
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-06"><strong>NÚMERO DE CUOTAS</strong></label>
+                                                            <apex:inputText value="{!NumeroPagosEntrada}" label="Cuotas Entrada" styleClass="slds-input" onkeydown="return checkDecimal(this);">
+                                                                <apex:actionSupport action="{!calcularCoutasSaldoEntrada}" event="onchange" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                            </apex:inputText>
+                                                        </div>
+                                                    </div>
+                                                </div> 
+                                            </fieldset>
+                                            <fieldset class="slds-form-element">
+                                                <legend class="slds-form-element__label slds-text-title_caps">Agregar Nuevo Pago</legend>
+                                                <div class="slds-form-element__group">
+                                                    <div class="slds-form-element__row">
+                                                        <div class="slds-form-element slds-size_1-of-1">
+                                                            <label class="slds-form-element__label" for="input-06">Fecha de Nuevo Pago</label>
+                                                            <div class="hideCurrDate">
+                                                                <apex:inputField value="{!cuotaExtraEntrada.Cuo.Fecha__c}" styleClass="slds-input">
+                                                                </apex:inputField>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-form-element__row">
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-04">Monto</label>
+                                                            <apex:inputField value="{!cuotaExtraEntrada.Cuo.Monto_Pago__c}" label="Monto Nuevo Pago" styleclass="slds-input" onkeydown="return checkDecimal(this);"/>
+                                                        </div>
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <apex:commandButton value="Nuevo Pago" action="{!AgregarCuotaEntrada}" reRender="theForm" status="status" oncomplete="toggleVerFinanciamiento();"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Tabla "DATOS DE ENTRADA" Calculo de Cuotas START -->
+                                    <div class="slds-col">
+                                        <apex:dataTable value="{!listaCuotasEntradaVisible}" var="item" styleClass="slds-table slds-table_bordered">
+                                            <apex:column headerValue="Cuota">
+                                                <apex:outputText value="{!item.numeroCuota}"/>
+                                            </apex:column>
+                                            <apex:column headerValue="Fijar Valores">
+                                                <apex:inputCheckbox value="{!item.Seleccionar}" >
+                                                    <apex:actionSupport event="onchange" action="{!calcularCoutasSaldoEntrada}" reRender="resumenVentasDiv,PanelFinanciamiento" status="status"/>
+                                                </apex:inputCheckbox>
+                                            </apex:column>
+                                            <apex:column headerValue="Fecha" >
+                                                <div class="hideCurrDate">
+                                                    <apex:inputField value="{!item.Cuo.Fecha__c}" >
+                                                        <apex:actionSupport event="onchange" action="{!item.modificar}" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                    </apex:inputField>
+                                                </div>
+                                            </apex:column>
+                                            <apex:column headerValue="Monto">
+                                                <apex:variable var="c" value="{!If(item.numeroCuota==0,true,false) }" />
+                                                <apex:variable var="cuo" value="{!If(item.numeroCuota>0,true,false) }" />
+                                                <apex:inputField value="{!item.Cuo.Monto_Pago__c}" style="min-width: 8rem;width: 8rem;" onkeydown="return checkDecimal(this);" rendered="{!c}" html-disabled="true">
+                                                    <apex:actionSupport event="onchange" action="{!item.modificar}" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                </apex:inputField>
+                                                <apex:inputField value="{!item.Cuo.Monto_Pago__c}" style="min-width: 8rem;width: 8rem;" onkeydown="return checkDecimal(this);" rendered="{!cuo}">
+                                                    <apex:actionSupport event="onchange" action="{!item.modificar}" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                </apex:inputField>
+                                                
+                                                <apex:facet name="footer">
+                                                    <apex:outputText value="{0, number, Currency}" label="Descuento" style="min-width: 5rem;width: 5rem;">
+                                                        <apex:param value="{!TotalMontoSaldoEntrada}"/>
+                                                    </apex:outputText>
+                                                </apex:facet>
+                                            </apex:column>                                            
+                                            <!--apex:column >
+                                                <apex:commandButton styleclass="slds-button slds-button_icon" action="{!item.Eliminar}" value="Eliminar"
+                                                                    reRender="theForm,PanelFinanciamiento" status="status" oncomplete="toggleVerFinanciamiento();" rendered="{!item.numeroCuota>1}">
+                                                    <svg class="slds-button__icon" aria-hidden="true">
+                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#clear')}"></use>
+                                                    </svg>
+                                                    <span class="slds-assistive-text">Eliminar</span>
+                                                </apex:commandButton>
+                                            </apex:column-->
+                                        </apex:dataTable>
+                                    </div>
+                                    <!-- Tabla "DATOS DE ENTRADA" Calculo de Cuotas END -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="slds-vertical-tabs__content slds-hide" id="slds-vertical-tabs-1" role="tabpanel" aria-labelledby="slds-vertical-tabs-1__nav">
+                            <div class="slds-text-longform">
+                                <h3 class="slds-text-heading_medium">Datos de Saldo</h3>
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col">
+                                        
+                                        <div class="slds-form slds-form_compound">
+                                            <fieldset class="slds-form-element">
+                                                <legend class="slds-form-element__label slds-text-title_caps">Valor de Saldo</legend>
+                                                <div class="slds-form-element__group">
+                                                    <div class="slds-form-element__row">
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-01">Monto</label>
+                                                            <apex:outputText value="{!Saldo}" label="Saldo" styleClass="slds-input">
+                                                                <apex:actionSupport event="onchange" action="{!recalcularValorSaldo}" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                            </apex:outputText>
+                                                        </div>
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-02">Porcentaje(%)</label>
+                                                            <apex:outputText value="{!SaldoPor}" label="Saldo %" styleClass="slds-input">
+                                                                <apex:actionSupport event="onchange" action="{!recalcularPorcentajeEntrada}" status="status" reRender="theForm" oncomplete="toggleVerFinanciamiento();"/>
+                                                            </apex:outputText>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            <fieldset class="slds-form-element">
+                                                <legend class="slds-form-element__label slds-text-title_caps">Detalles de Plazo</legend>
+                                                <div class="slds-form-element__group">
+                                                    <div class="slds-form-element__row">
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-04">Cuotas</label>
+                                                            <apex:inputText value="{!plazo}" label="Cuotas" rendered="{!tipoFinanciamiento != 'CH'}" styleClass="slds-input">
+                                                                <apex:actionSupport action="{!calcularCoutasSaldo}" event="onchange" status="status" reRender="theForm" oncomplete="toggleFinanciamientoEntrada();"/>
+                                                            </apex:inputText>
+                                                        </div>
+                                                        <div class="slds-form-element slds-size_1-of-2">
+                                                            <label class="slds-form-element__label" for="input-05">Tasa de Interes(%)</label>
+                                                            <apex:inputText value="{!tasaInteresSaldoCredito}" Label="Tasa Interes Saldo" styleClass="slds-input">
+                                                                <apex:actionSupport action="{!calcularCoutasSaldo}" event="onchange" reRender="theForm" status="status" oncomplete="toggleFinanciamientoEntrada();"/>
+                                                            </apex:inputText>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                    <div class="slds-col">
+                                        <apex:dataTable value="{!listaCuotas}" var="item" Rendered="{!TipoFinanciamiento!='Contado'}" styleClass="slds-table slds-table_bordered">
+                                            <apex:column headerValue="Cuota">
+                                                <apex:outputText value="{!item.numeroCuota}"/>
+                                            </apex:column>
+                                            <apex:column headerValue="Fecha">
+                                                <apex:outputField value="{!item.Cuo.Fecha__c}"/>
+                                            </apex:column>
+                                            <apex:column headerValue="Monto">
+                                                <apex:outputField value="{!item.Cuo.Monto_Pago__c}"/>
+                                                <apex:facet name="footer">
+                                                    <apex:outputText value="{0, number, Currency}" label="Descuento" style="min-width: 5rem;width: 5rem;">
+                                                        <apex:param value="{!TotalMontoSaldo}"/>
+                                                    </apex:outputText>
+                                                </apex:facet>
+                                            </apex:column>
+                                        </apex:dataTable>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:outputPanel>
+        </div>
+    </apex:form>
+    </body>
+    
+</html>
+    
+</apex:page>

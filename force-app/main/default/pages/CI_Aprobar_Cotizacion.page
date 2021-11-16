@@ -1,0 +1,12 @@
+<apex:page standardController="Cotizacion__c" extensions="CI_apex" action="{!updateCotizacion}" showHeader="false" standardStylesheets="true" sidebar="false" docType="html-5.0">
+<html>
+<head>
+
+</head>
+<body>
+
+La Cotización ha sido aprobada...
+
+</body>
+</html>
+</apex:page>

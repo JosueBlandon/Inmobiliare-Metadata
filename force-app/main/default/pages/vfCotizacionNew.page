@@ -1,0 +1,632 @@
+<apex:page standardController="Cotizacion__c" extensions="extensionCotizacion" lightningStylesheets="true" docType="html-5.0" showheader="false" sidebar="false">
+    
+<html>
+    
+    <head>
+    
+    <apex:slds />
+    
+    <link rel="stylesheet" href="{!Urlfor($Resource.Resource,'css/style.css')}" />
+    <script src="{!Urlfor($Resource.Resource,'js/jquery-1.12.3.js')}"></script>
+    <script src="{!Urlfor($Resource.Resource,'js/jquery.dataTables2.min.js')}"></script>
+    <link rel="stylesheet" href="{!Urlfor($Resource.Resource,'css/jquery.dataTables.css')}" />
+    <link rel="stylesheet" href="{!Urlfor($Resource.Resource,'css/style.css')}" />
+    
+    <style>
+        .slds-scope .slds-page-header__detail-row {
+            margin: 0rem 0rem 0rem !important;
+        }
+        .slds-scope .slds-card__header {
+            padding: .5rem .75rem 0.5rem !important;
+        }
+        #ToastMessage{
+            position: fixed;
+            top: 8.8%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+    </style>
+    
+    <script>
+    //j$ = jQuery.noConflict();
+    $(document).ready( function () {
+        var accTable = $('[id$="tablaTerreno"]').DataTable({
+          destroy:true,     
+          "order": [[ 0, "desc" ]],
+          "bLengthChange": true,
+          "aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todo"]],
+          "iDisplayLength": 25,
+          "language": {
+              "search": "Buscar : ",
+              "searchPlaceholder": "Búsqueda",
+              "lengthMenu": "Ver _MENU_ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
+              "zeroRecords": "No hay resultados Disponibles",
+              "info": "Pagina _PAGE_ de _PAGES_ - Registros _START_ a _END_ de _TOTAL_",
+              "infoEmpty": "No hay resultados disponibles",
+              "infoFiltered": "(Filtrado de _MAX_ Registros en Total)",
+              "paginate": {
+                  "previous": "<i class='fa fa-chevron-circle-left'></i> Anterior",
+                  "next": "Siguiente <i class='fa fa-chevron-circle-right'></i>"
+              }           
+          }     
+        });        
+    });   
+    function Rendertable2() {
+        var accTable = $('[id$="tablaTerreno"]').DataTable({
+          destroy:true,     
+          "order": [[ 0, "desc" ]],
+          "bLengthChange": true,
+          "aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todo"]],
+          "iDisplayLength": 25,
+          "language": {
+              "search": "Buscar : ",
+              "searchPlaceholder": "Búsqueda",
+              "lengthMenu": "Ver _MENU_ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
+              "zeroRecords": "No hay resultados Disponibles.",
+              "info": "Pagina _PAGE_ de _PAGES_ - Registros _START_ a _END_ de _TOTAL_",
+              "infoEmpty": "No hay resultados disponibles",
+              "infoFiltered": "(Filtrado de _MAX_ Registros en Total)",
+              "paginate": {
+                  "previous": "<i class='fa fa-chevron-circle-left'></i> Anterior",
+                  "next": "Siguiente <i class='fa fa-chevron-circle-right'></i>"
+              }           
+          }     
+        });    
+    }
+    function cleanFields() {
+        var opcionesUrbanizacion = '{!opcionesUrbanizacion}';
+        //alert(opcionesUrbanizacion);
+        $("[id$='Manzana']").val('');
+        $("[id$='Modelo']").val('');    
+    }
+    </script>
+    
+    <script>
+        $( document ).ready(function() {
+            var EstadoVenta = '{!Oportunidad.Estado_de_Venta__c}';
+            var EstadoAprobar = '{!Oportunidad.Estado_de_Aprobacion__c}';
+            if(EstadoVenta=='Vendido' && EstadoAprobar=='Aprobado') {
+                toastLaunch();        
+            }   
+        });
+        function toastLaunch(){
+            var element = document.getElementById("ToastMessage");
+            element.classList.toggle("slds-hidden");      
+        } 
+        function toggleVerHistorico(){
+            var input1 = document.getElementById('divFondoFinanciamiento');
+            input1.classList.toggle("slds-backdrop_open");
+            var input2 = document.getElementById('divModalHistorico');
+            input2.classList.toggle("slds-fade-in-open");
+        }
+        
+        function toggleVerPromociones(){
+            var input1 = document.getElementById('divFondoFinanciamiento');
+            input1.classList.toggle("slds-backdrop_open");
+            var input2 = document.getElementById('divModalPromociones');
+            input2.classList.toggle("slds-fade-in-open");
+        }
+        function toggleVerAdicionales(){
+            var input1 = document.getElementById('divFondoFinanciamiento2');
+            input1.classList.toggle("slds-backdrop_open");
+            var input2 = document.getElementById('divModalAdicionales');
+            input2.classList.toggle("slds-fade-in-open");
+        }
+        function toggleOpenSideMenuButton(){
+            var input1 = document.getElementById('divOpenSideMenu');
+            input1.classList.toggle("slds-is-open");
+        }      
+        function highlighRowLote(elem){
+            seleccionPropiedadLoteMethod(elem);
+            var valor = "propiedadRow-"+elem;
+            var input = document.getElementById(valor);
+            input.classList.toggle("slds-is-selected");
+        }
+        function unhighlighRowLote(elem){
+            
+            input.classList.toggle("slds-not-selected");
+        }
+    </script>
+    
+    </head>
+    
+    <body>
+    
+    <center>
+      <apex:actionStatus id="loadingValues">
+        <apex:facet name="start">
+          <div class="demo-only" style="height: 0rem;">
+            <div role="status" class="slds-spinner slds-spinner_medium">
+              <span class="slds-assistive-text">Loading</span>
+              <div class="slds-spinner__dot-a"></div>
+              <div class="slds-spinner__dot-b"></div>
+            </div>
+          </div>
+        </apex:facet>
+        <apex:facet name="stop"></apex:facet>                
+      </apex:actionStatus>
+    </center>
+    
+    <apex:form id="theForm">
+    
+        <apex:actionFunction action="{!Guardar}" name="GuardarCotizacion"/>
+        <apex:actionFunction action="{!SeleccionarPropiedadLote}" name="seleccionPropiedadLoteMethod" reRender="theForm" status="status" oncomplete="highlightRowAfter('{!propiedadSeleccionada.lote.Id}');">
+            <apex:param id="seleccPropLote" name="propSele" value="" />
+        </apex:actionFunction>
+        
+        <article class="slds-card">
+          <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+              <div class="slds-media__figure">
+                <span class="slds-icon_container slds-icon-standard-account" title="account">
+                  <svg class="slds-icon" aria-hidden="true">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#opportunity')}" />
+                  </svg>
+                  <span class="slds-assistive-text">account</span>
+                </span>
+              </div>
+              <div class="slds-media__body">
+                <h2 class="slds-card__header-title">
+                  <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                    <span>Cotización</span>
+                  </a>
+                  <!-- h1 class="slds-page-header__title slds-m-right_small slds-align-middle slds-truncate" title="Cotización para {!Oportunidad.Account.Name}">{!Oportunidad.Account.Name}</h1 -->
+                </h2>
+              </div>
+              <div class="slds-no-flex">
+                <apex:commandButton styleclass="slds-button slds-button_brand" style="border-radius: 5px;" value="Guardar" action="{!Guardar}" disabled="false" rerender="theForm" status="mySaveStatus1" rendered="{!NOT(NoModificable)}"/>
+                <!--apex:commandButton styleclass="slds-button slds-button_brand" style="border-radius: 5px; {!hidesave}" value="Guardar" action="{!Guardar}" disabled="false" rerender="theForm" status="mySaveStatus1" rendered="{!NOT(NoModificable)}"/ -->
+                <!--apex:commandButton styleclass="slds-button slds-button_brand" style="border-radius: 5px;" value="Guardar" action="{!Guardar}" disabled="false" rerender="theForm" status="mySaveStatus1" rendered="{!IF(Oportunidad.Estado_de_Venta__c='Vendido' && Oportunidad.Estado_de_Aprobacion__c='Aprobado',false,true)}"/-->
+                <apex:commandButton styleclass="slds-button slds-button_neutral" style="border-radius: 5px;" value="Cancelar" action="{!Cancel}"/>
+                <apex:commandButton styleclass="slds-button slds-button_neutral" style="border-radius: 5px;" value="Financiamiento" action="{!redirectToFinanciamiento}" rendered="{!NOT(NoFinanciable)}"/>
+              </div>
+              
+              
+              <div class="slds-dropdown-trigger slds-dropdown-trigger_click slds-button_last" id="divOpenSideMenu">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" aria-haspopup="true" title="More Actions" onclick="toggleOpenSideMenuButton();return false;">
+                    <svg class="slds-button__icon" aria-hidden="true">
+                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#down')}" />
+                    </svg>
+                    <span class="slds-assistive-text">More Actions</span>
+                </button>
+                <div class="slds-dropdown slds-dropdown_right">
+                    <ul class="slds-dropdown__list" role="menu" aria-label="Show More">
+                        <apex:outputPanel rendered="{!NOT(esVendedor)}">
+                        <li class="slds-dropdown__item" role="presentation">
+                            <a href="javascript:void(0);" role="menuitem" tabindex="-1" onclick="toggleVerPromociones();">
+                                <span class="slds-truncate" title="Menu Item Four">Promociones</span>
+                            </a>
+                        </li>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!Oportunidad.Estado_de_Aprobacion__c!='Aprobado'}">
+                        <li class="slds-dropdown__item" role="presentation">
+                            <a href="javascript:void(0);" role="menuitem" tabindex="-1" onclick="toggleVerAdicionales();">
+                                <span class="slds-truncate" title="Menu Item Four">Adicionales</span>
+                            </a>
+                        </li>
+                        <li class="slds-has-divider_top-space" role="separator"></li>
+                        <li class="slds-dropdown__item" role="presentation">
+                            <a href="javascript:void(0);" role="menuitem" tabindex="-1" onclick="toggleVerHistorico();">
+                                <span class="slds-truncate" title="Menu Item Four">Históricos</span>
+                            </a>
+                        </li>
+                        </apex:outputPanel>
+                    </ul>
+                </div>
+              </div>
+              
+            </header>
+            
+          </div>
+          
+        </article>
+        
+        <article class="slds-card">
+            <apex:messages styleClass="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" />
+                
+          <div class="slds-card__body slds-card__body_inner">
+            <ul class="slds-grid slds-wrap slds-grid_pull-padded">
+              <li class="slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_1-of-5">
+                <article class="slds-tile slds-media slds-card__tile slds-hint-parent">
+                  <div class="slds-media__body">
+                    <div class="slds-grid slds-grid_align-spread slds-has-flexi-truncate">
+                      <h3 class="slds-tile__title slds-truncate" title="Nombre del cliente">
+                        <a href="javascript:void(0);">Nombre del cliente</a>
+                      </h3>
+                    </div>
+                    <div class="slds-tile__detail">
+                      <dl class="slds-list_horizontal slds-wrap">
+                        <dd class="slds-item_detail slds-truncate" title="{!Oportunidad.Account.Name}">{!Oportunidad.Account.Name}</dd>
+                      </dl>
+                    </div>
+                  </div>
+                </article>
+              </li>
+              <li class="slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_1-of-5">
+                <article class="slds-tile slds-media slds-card__tile slds-hint-parent">
+                  <div class="slds-media__body">
+                    <div class="slds-grid slds-grid_align-spread slds-has-flexi-truncate">
+                      <h3 class="slds-tile__title slds-truncate" title="Email del cliente">
+                        <a href="javascript:void(0);">Email del cliente</a>
+                      </h3>
+                    </div>
+                    <div class="slds-tile__detail">
+                      <dl class="slds-list_horizontal slds-wrap">
+                        <dd class="slds-item_detail slds-truncate" title="{!Oportunidad.Account.CI_Email__c}">{!Oportunidad.Account.CI_Email__c}</dd>
+                      </dl>
+                    </div>
+                  </div>
+                </article>
+              </li>
+              <li class="slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_1-of-5">
+                <article class="slds-tile slds-media slds-card__tile slds-hint-parent">
+                  <div class="slds-media__body">
+                    <div class="slds-grid slds-grid_align-spread slds-has-flexi-truncate">
+                      <h3 class="slds-tile__title slds-truncate" title="Móvil del cliente">
+                        <a href="javascript:void(0);">Móvil del cliente</a>
+                      </h3>
+                    </div>
+                    <div class="slds-tile__detail">
+                      <dl class="slds-list_horizontal slds-wrap">
+                        <dd class="slds-item_detail slds-truncate" title="{!Oportunidad.Account.CI_Movil__c}">{!Oportunidad.Account.CI_Movil__c}</dd>
+                      </dl>
+                    </div>
+                  </div>
+                </article>
+              </li>
+              <li class="slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_1-of-5">
+                <article class="slds-tile slds-media slds-card__tile slds-hint-parent">
+                  <div class="slds-media__body">
+                    <div class="slds-grid slds-grid_align-spread slds-has-flexi-truncate">
+                      <h3 class="slds-tile__title slds-truncate" title="Identificación del cliente">
+                        <a href="javascript:void(0);">Identificación del cliente</a>
+                      </h3>
+                    </div>
+                    <div class="slds-tile__detail">
+                      <dl class="slds-list_horizontal slds-wrap">
+                        <dd class="slds-item_detail slds-truncate" title="{!Oportunidad.Account.CI_Identificacion__c}">{!Oportunidad.Account.CI_Identificacion__c}</dd>
+                      </dl>
+                    </div>
+                  </div>
+                </article>
+              </li>
+               
+            </ul>
+          </div>
+          
+        </article>
+        
+        <article>
+            <ul class="slds-grid slds-page-header__detail-row">
+                <!-- li class="slds-page-header__detail-block slds-size_1-of-6">
+                   <p class="slds-text-title slds-truncate slds-m-bottom_xx-small" title="Abrir venta de Filtros"></p>
+                   <p class="slds-text-body_regular">
+                        <button class="slds-button slds-button_icon slds-button_icon-border-filled slds-button_icon-border" onclick="return toggleFiltros();" href="javascript:void(0);" id="buttonFiltros">
+                            <svg class="slds-button__icon" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#filterList')}"></use>
+                            </svg>
+                            <span class="slds-assistive-text">Mostrar Panel Filtros</span>
+                        </button>
+                    </p>
+                </li -->
+                <li class="slds-page-header__detail-block slds-size_1-of-8">
+                    <p class="slds-text-title slds-truncate slds-m-bottom_xx-small" title="Estado de Cotización">Estado de Cotización</p>
+                    <p class="slds-text-body_regular">{!Cotizacion__c.Estado__c}</p>
+                </li>
+                <li class="slds-page-header__detail-block slds-size_1-of-8">
+                    <p class="slds-text-title slds-truncate slds-m-bottom_xx-small" style="position:relative;top:5px;" title="Tipo de Venta">Tipo de Venta</p>
+                    <!-- p class="slds-text-body_regular">{!Cotizacion__c.Tipo_de_Venta__c}</p -->
+                    <apex:inputField styleclass="slds-select" style="position:relative;top:5px;" value="{!Cotizacion__c.CI_Tipo_Venta__c}">
+                        <apex:actionSupport event="onchange" action="{!changeFinanciamiento}" oncomplete="Rendertable2()" reRender="theForm" status="status"/>
+                    </apex:inputField>
+                </li>
+                <li class="slds-page-header__detail-block slds-size_2-of-8">
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="select-01">Proyecto</label>
+                      <div class="slds-form-element__control">
+                        <div class="slds-select_container">
+                          <p class="slds-text-body_regular slds-truncate" title="{!proyectoSeleccionado}">                        
+                          <apex:selectList styleclass="slds-select" label="Proyecto" size="1" multiselect="false" value="{!proyectoSeleccionado}">
+                              <apex:selectOption itemLabel=" -- Ninguno -- " itemValue="false"></apex:selectOption>
+                              <apex:selectOptions value="{!opcionesProyecto}"/> 
+                              <!-- apex:actionSupport event="onchange" onsubmit="table();" reRender="theForm" status="status"/ -->
+                              <apex:actionSupport event="onchange" oncomplete="Rendertable2();cleanFields();" action="{!refreshUrbaninzacion}" reRender="theForm" status="loadingValues"/>
+                          </apex:selectList>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                </li>
+                <li class="slds-page-header__detail-block slds-size_1-of-8">
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label" for="select-01">Etapa</label>
+                        <p class="slds-text-body_regular slds-truncate" title="{!urbanizacionSeleccionada}">
+                        <apex:selectList styleclass="slds-select" label="Etapa" size="1" multiselect="false" value="{!urbanizacionSeleccionada}">
+                            <apex:selectOption itemLabel=" -- Ninguno -- " itemValue="false"></apex:selectOption>
+                            <apex:selectOptions value="{!opcionesUrbanizacion}"/> 
+                            <apex:actionSupport event="onchange" oncomplete="Rendertable2();" action="{!getvaluesFilter}" reRender="theForm" status="loadingValues"/>
+                        </apex:selectList>
+                        </p>
+                    </div>
+                </li>
+                <li class="slds-page-header__detail-block slds-size_1-of-8">
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label" for="select-01">Manzana</label>
+                        <apex:inputText id="Manzana" styleclass="slds-input" value="{!manzanaSeleccionada}" label="Manzana">
+                            <apex:actionSupport event="onchange" oncomplete="Rendertable2()" action="{!getvaluesFilter}" reRender="theForm" status="loadingValues"/>
+                        </apex:inputText>
+                    </div>
+                </li>
+                <apex:outputPanel rendered="{!Cotizacion__c.CI_Tipo_Venta__c=='6'}">
+                <li class="slds-page-header__detail-block slds-size_1-of-8">
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label" for="select-01">Código de Venta Anterior</label>
+                        <p class="slds-text-body_regular"> <apex:inputField styleclass="slds-select" value="{!Cotizacion__c.Venta_Anterior__c}"/></p>
+                    </div>
+                </li>
+                </apex:outputPanel>
+                <!--li class="slds-size_1-of-6">
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="select-01">Manzana</label>
+                      <div class="slds-form-element__control">
+                        <div class="slds-select_container">
+                          <p class="slds-text-body_regular slds-truncate" title="{!manzanaSeleccionada}">
+                          <apex:selectList styleclass="slds-select" label="Proyecto" size="1" multiselect="false" value="{!manzanaSeleccionada}">
+                              <apex:selectOption itemLabel=" -- Ninguno -- " itemValue="false"></apex:selectOption>
+                              <apex:selectOptions value="{!opcionesManzana}"/>
+                              <apex:actionSupport event="onchange" action="{!refreshInmueble}" reRender="theForm" status="status"/>
+                          </apex:selectList>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                </li>
+                <li class="slds-size_1-of-6">
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="select-01">Inmueble</label>
+                      <div class="slds-form-element__control">
+                        <div class="slds-select_container">
+                          <p class="slds-text-body_regular slds-truncate" title="{!inmuebleSeleccionado}">
+                          <apex:selectList styleclass="slds-select" label="Proyecto" size="1" multiselect="false" value="{!inmuebleSeleccionado}">
+                              <apex:selectOption itemLabel=" -- Ninguno -- " itemValue="false"></apex:selectOption>
+                              <apex:selectOptions value="{!opcionesInmueble}"/>
+                              <apex:actionSupport event="onchange" action="{!changeInmueble}" reRender="theForm" status="status"/>
+                          </apex:selectList>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                </li -->
+                <!-- li class="slds-size_1-of-7">
+                    <div class="slds-form-element">
+                      <label class="slds-form-element__label" for="select-01">Modelo</label>
+                      <div class="slds-form-element__control">
+                        <div class="slds-select_container">
+                          <p class="slds-text-body_regular slds-truncate" title="{!modeloSeleccionado}">
+                          <apex:selectList styleclass="slds-select" label="Proyecto" size="1" multiselect="false" value="{!modeloSeleccionado}">
+                              <apex:selectOption itemLabel=" -- Ninguno -- " itemValue="false"></apex:selectOption>
+                              <apex:selectOptions value="{!opcionesModelo}"/>
+                              <apex:actionSupport event="onchange" action="{!changeModelo}" reRender="theForm" status="status"/>
+                          </apex:selectList>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                </li -->
+            </ul>
+        </article>
+        
+        <article class="slds-card">
+            <div class="slds-card__body slds-scrollable"> 
+                <apex:dataTable value="{!listaPropiedad}" var="item" id="tablaTerreno" style="width:100%;" styleClass="slds-table slds-table_bordered slds-table_fixed-layout">
+                    <apex:column headerValue="" onclick="highlighRowLote('{!item.implan.Id}')" ondblclick="unhighlighRowLote('{!item.implan.Id}')">
+                        <apex:inputCheckbox value="{!item.Seleccionada}"/>
+                    </apex:column>
+                    <apex:column headerValue="Etapa"  onclick="highlighRowLote('{!item.implan.Id}')">
+                        <apex:outputField value="{!item.implan.Lote__r.CI_manzana__r.Etapa__r.Name}"/>
+                    </apex:column>
+                    <apex:column headerValue="Manzana" onclick="highlighRowLote('{!item.implan.Id}')">
+                        <apex:outputField value="{!item.implan.Lote__r.CI_manzana__r.Name}"/>
+                    </apex:column>
+                    <apex:column headerValue="Inmueble" onclick="highlighRowLote('{!item.implan.Id}')">
+                        <div class="slds-truncate" title="{!item.implan.Lote__r.Name}">
+                            <apex:outputField value="{!item.implan.Lote__r.Name}"/>
+                        </div>
+                    </apex:column>
+                    <!--apex:column headerValue="Modelo" onclick="highlighRowLote('{!item.implan.Id}')">
+                        <apex:outputField value="{!item.implan.Modelo__r.Name}"/-->
+                    <apex:column headerValue="Modelo">
+                        <apex:outputField value="{!item.implan.Modelo__r.Name}" rendered="{!propiedadSeleccionada == null || TieneHistorico || Oportunidad.Estado_de_Aprobacion__c=='Aprobado'}"/>
+                        <apex:selectList styleclass="slds-select" label="Proyecto" size="1" multiselect="false" value="{!item.modeloSeleccionado}" rendered="{!propiedadSeleccionada != null && NOT(TieneHistorico) && NOT(Oportunidad.Estado_de_Aprobacion__c=='Aprobado')}">
+                            <apex:selectOptions value="{!opcionesModelo}"/> 
+                            <!-- apex:actionSupport event="onchange" onsubmit="table();" reRender="theForm" status="status"/ -->
+                            <apex:actionSupport event="onchange" action="{!item.changeModelo}" reRender="theForm" status="loadingValues"/>
+                        </apex:selectList>
+                    </apex:column>
+                    <apex:column headerValue="Monto Base" >
+                        <apex:outputText value="{0, number, Currency}" rendered="{!propiedadSeleccionada == null || Oportunidad.Estado_de_Aprobacion__c=='Aprobado'}">
+                            <apex:param value="{!item.montoTotal}" />
+                        </apex:outputText>
+                        <apex:inputText value="{!item.montoFinal}" rendered="{!propiedadSeleccionada != null && Oportunidad.Estado_de_Aprobacion__c!='Aprobado'}">
+                            <apex:actionSupport event="onchange" action="{!actualizarMonto}" reRender="theForm" status="loadingValues"/>
+                        </apex:inputText>
+                    </apex:column>
+                    <apex:column headerValue="Fecha de Límite de Venta" onclick="highlighRowLote('{!item.implan.Id}')">
+                        <apex:outputField value="{!item.implan.Lote__r.CI_Fecha_Limite_Venta__c}"/>
+                    </apex:column>
+                </apex:dataTable>
+          </div>
+        </article>
+        
+        <!-- section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" -->
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-modal_large" id="divModalPromociones">
+          <div class="slds-modal__container">
+            <header class="slds-modal__header">
+              <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="toggleVerPromociones();return false;">
+                  <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#close')}" />
+                  </svg>
+                  <span class="slds-assistive-text">Cerrar</span>
+              </button>
+              <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Selección de Promociones</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                <apex:pageBlock id="seccionPromocionesPruebas">
+                    <apex:pageBlockTable value="{!listaPromociones}" var="item">
+                        <apex:column headerValue="Agregar">
+                            <apex:inputCheckbox value="{!item.Seleccionar}">
+                            </apex:inputCheckbox>  
+                        </apex:column>
+                        <apex:column headerValue="Descripción">
+                            <apex:outputText value="{!item.promocion.Promocion__r.Name}"></apex:outputText>
+                        </apex:column>
+                        <apex:column headerValue="Costo">
+                            <apex:outputText value="{!item.promocion.Valor__c}" id="Costo"/><br/>
+                        </apex:column>
+                        <apex:column headerValue="Fecha Vigencia Inicio">
+                             <apex:outputText value="{0,date,dd/MM/yy}"><apex:param value="{!item.promocion.Vigencia_Inicio__c}" id="Fecha_Vigencia_Inicio"/></apex:outputText><br/>
+                        </apex:column>
+                        <apex:column headerValue="Fecha Vigencia Fin">
+                            <apex:outputText value="{0,date,dd/MM/yy}"><apex:param value="{!item.promocion.Vigencia_Fin__c}" id="Fecha_Vigencia_Fin"/></apex:outputText><br/>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:pageBlock>
+            </div>
+            <footer class="slds-modal__footer">
+              <button class="slds-button slds-button_neutral" onclick="toggleVerPromociones();return false;">Cancel</button>
+              <button class="slds-button slds-button_brand">Save</button>
+            </footer>
+          </div>
+        </section>
+        <div class="slds-backdrop" id="divFondoFinanciamiento"></div>
+        <!-- div class="slds-backdrop slds-backdrop_open"></div -->
+       
+        
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-modal_large" id="divModalAdicionales">
+          <div class="slds-modal__container">
+            <header class="slds-modal__header">
+              <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="toggleVerAdicionales();return false;">
+                  <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#close')}" />
+                  </svg>
+                  <span class="slds-assistive-text">Cerrar</span>
+              </button>
+              <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Selección de Adicionales</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                <apex:pageBlock >
+                    <apex:pageBlockTable value="{!listaAdicionales}" var="item">
+                        <apex:column headerValue="Agregar">
+                            <apex:inputCheckbox value="{!item.Seleccionar}">
+                            </apex:inputCheckbox>
+                        </apex:column>
+                        <apex:column headerValue="Descripción">
+                            <apex:outputText value="{!item.promocion.Promocion__r.Name}"></apex:outputText>
+                        </apex:column>
+                        <apex:column headerValue="Costo">
+                            <apex:outputText value="{!item.promocion.Valor__c}" id="Costo"/><br/>
+                        </apex:column>
+                        <apex:column headerValue="Nivel">
+                            <apex:outputText value="{!item.promocion.Nivel__c}" /> 
+                        </apex:column>
+                        <apex:column headerValue="Fecha Vigencia Inicio">
+                             <apex:outputText value="{0,date,dd/MM/yy}"><apex:param value="{!item.promocion.Vigencia_Inicio__c}" id="Fecha_Vigencia_Inicio"/></apex:outputText><br/>
+                        </apex:column>
+                        <apex:column headerValue="Fecha Vigencia Fin">
+                            <apex:outputText value="{0,date,dd/MM/yy}"><apex:param value="{!item.promocion.Vigencia_Fin__c}" id="Fecha_Vigencia_Fin"/></apex:outputText><br/>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:pageBlock>
+            </div>
+            <footer class="slds-modal__footer">
+              <button class="slds-button slds-button_neutral" onclick="toggleVerAdicionales();return false;">Cancel</button>
+              <apex:commandButton styleclass="slds-button slds-button_brand" style="border-radius: 5px;" value="Guardar" action="{!actualizarMonto}" 
+                                                            disabled="false" rerender="theForm" status="mySaveStatus1"/>
+              </footer>
+            </div>
+        </section>
+        
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-modal_large" id="divModalHistorico">
+          <div class="slds-modal__container">
+            <header class="slds-modal__header">
+              <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="toggleVerHistorico();return false;">
+                  <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#close')}" />
+                  </svg>
+                  <span class="slds-assistive-text">Cerrar</span>
+              </button>
+              <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Selección de Históricos</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                <apex:pageBlock >
+                    <apex:pageBlockTable value="{!listaHistoricos}" var="item">
+                        <apex:column headerValue="Agregar">
+                            <!-- apex:inputCheckbox value="{!item.Seleccionar}">
+                            </apex:inputCheckbox -->
+                            <apex:inputCheckbox value="{!item.Seleccionar}" rendered="{!IF(item.historial.CI_Promocion__r.Prescindible__c=true,true,false)}">
+                            </apex:inputCheckbox>
+                            <apex:inputCheckbox value="{!item.Seleccionar}" html-checked="checked" style="display:none;" rendered="{!IF(item.historial.CI_Promocion__r.Prescindible__c=false,true,false)}">
+                            </apex:inputCheckbox>
+                            <input type="checkbox" name="adicion" disabled="disabled" value="{!item.Seleccionar}" checked="true" style="display:{!IF(item.historial.CI_Promocion__r.Prescindible__c=false, 'block','none')}" /> 
+                        </apex:column>
+                        <apex:column headerValue="Descripción">
+                            <apex:outputText value="{!item.historial.CI_Promocion__r.Name}"></apex:outputText>
+                        </apex:column>
+                        <apex:column headerValue="Nivel">
+                            <apex:outputText value="{!item.historial.Nivel__c}" /> 
+                        </apex:column>
+                        <apex:column headerValue="Costo">
+                            <apex:outputText value="{!item.historial.Valor_Promocion__c}" id="Costo"/><br/>
+                        </apex:column>
+                        <!-- <apex:column headerValue="Fecha Vigencia Inicio">
+                             <apex:outputText value="{0,date,dd/MM/yy}"><apex:param value="{!item.promocion.Vigencia_Inicio__c}" id="Fecha_Vigencia_Inicio"/></apex:outputText><br/>
+                        </apex:column>
+                        <apex:column headerValue="Fecha Vigencia Fin">
+                            <apex:outputText value="{0,date,dd/MM/yy}"><apex:param value="{!item.promocion.Vigencia_Fin__c}" id="Fecha_Vigencia_Fin"/></apex:outputText><br/>
+                        </apex:column> -->
+                    </apex:pageBlockTable>
+                </apex:pageBlock>
+            </div>
+            <footer class="slds-modal__footer">
+              <button class="slds-button slds-button_neutral" onclick="toggleVerHistorico();return false;">Cancel</button>
+              <apex:commandButton styleclass="slds-button slds-button_brand" style="border-radius: 5px;" value="Guardar" action="{!actualizarMonto}" 
+                                                            disabled="false" rerender="theForm" status="mySaveStatus1"/>
+              </footer>
+            </div>
+        </section>
+        
+        <div class="slds-backdrop" id="divFondoFinanciamiento2"></div>
+        
+        
+        </apex:form>
+        
+        <div class="demo-only slds-hidden" style="height:4rem" id="ToastMessage">
+          <div class="slds-notify_container slds-is-relative">
+            <div class="slds-notify slds-notify_toast slds-theme_warning" role="status">
+              <span class="slds-assistive-text">error</span>
+              <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top" duration="40000" title="Información de la oportunidad">
+                <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#warning')}" />
+                </svg>
+              </span>
+              <div class="slds-notify__content">
+                <h2 class="slds-text-heading_small ">La oportunidad ya ha sido aprobada y vendida.</h2>
+              </div>
+              <div class="slds-notify__close">
+                <button class="slds-button slds-button_icon slds-button_icon-inverse" duration="40000" title="Close" onclick='toastLaunch();'>
+                  <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#close')}" />
+                  </svg>
+                  <span class="slds-assistive-text">Close</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+    </body> 
+
+    </html>
+
+</apex:page>

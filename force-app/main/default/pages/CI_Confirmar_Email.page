@@ -1,0 +1,13 @@
+<apex:page standardController="Lead" extensions="CI_apex" action="{!updateValue}" showHeader="false" standardStylesheets="true" sidebar="false" docType="html-5.0">
+<html>
+<head>
+
+</head>
+<body>
+
+Correo Confirmado...
+
+
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,432 @@
+<apex:page standardController="Opportunity" extensions="CI_apex_equifax" renderAs="pdf"  showheader="false" sidebar="false" cache="false" expires="0"
+    applyHtmlTag="false" standardStylesheets="false" showQuickActionVfHeader="false" docType="html-5.0" id="page" applyBodyTag="false" >
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Documento sin título</title>
+  <style type="text/css" media="print">
+    body{
+      font-family: sans-serif;
+      font-size:8pt;"
+    }  
+    @page {
+      @bottom-left {  
+        font-size:12px;    
+        content: "<apex:outputText value="{0,date,dd/MM/yyyy HH:mm:ss a}"><apex:param value="{!NOW()- 0.25002}" /></apex:outputText>, Generado por: {!$User.FirstName} {!$User.LastName}";
+      }
+      @bottom-right {  
+        font-size:12px;    
+        content: "Página " counter(page) " de " counter(pages);
+      }
+    }        
+  </style>       
+</head>
+
+<body>
+  <table width="100%" border="1">
+    <tr>
+      <td style="width:20%;text-align:center;">CORPORACIÓN INMOBILIARE INTERNACIOANAL S.A. CORPINTER</td>
+      <td style="width:20%;">Usuario: WSMACHALELA</td>
+      <td style="width:60%;">Entidad: CORPORACIÓN INMOBILIARE INTERNACIOANAL S.A. CORPINTER</td>
+    </tr>
+    <tr>
+      <td><apex:image value="{!$Resource.Equifax}" width="200px" height="40px;" /></td>
+      <td>Fecha:&nbsp; 
+          <apex:outputText value="{0,date,dd}"><apex:param value="{!NOW()}" /></apex:outputText>&nbsp;-&nbsp;
+          <apex:outputText value="{!CASE(MONTH(DATEVALUE(NOW())),
+              1, 'Enero',
+              2, 'Febrero',
+              3, 'Marzo', 
+              4, 'Abril', 
+              5, 'Mayo', 
+              6, 'Junio',
+              7, 'Julio',
+              8, 'Agosto',
+              9, 'Septiembre',
+              10, 'Octubre',
+              11, 'Noviembre',
+              12, 'Diciembre',
+              '-')}" />&nbsp;-&nbsp;
+          <apex:outputText value="{0,date,yyyy}"><apex:param value="{!NOW()}" /></apex:outputText> 
+      </td>
+      <td>Hora:<apex:outputText value="{0, Time, HH:mm:ss}"><apex:param value="{!NOW()-0.25002}" /></apex:outputText></td>
+    </tr>
+  </table>
+  <p style="text-align:center;font-weight:bold;">MODELO EXPERTO CORPORACIÓN INMOBILIARE</p>
+  <p style="text-align:left;font-weight:bold;">IDENTIFICACIÓN CONSULTADA</p>
+  <p style="text-align:left;text-decoration:underline;"><span style="font-weight:bold;">Cédula de Identidad:</span> {!Opportunity.Account.CI_Identificacion__c} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-weight:bold;">Nombre:</span> {!Opportunity.Account.Name}</p>
+  <p style="text-align:left;font-weight:bold;">DATOS SOLICITUD</p>
+  <table width="100%" border="1">
+    <tr>
+      <td style="width:70%;">TIPO DOCUMENTO</td>
+      <td style="width:30%;">C</td>
+    </tr>
+    <tr>
+      <td>NÚMERO DE DOCUMENTO</td>
+      <td>{!Documento}</td>
+    </tr>
+    <tr>
+      <td>TIPO DE PROYECTO</td>
+      <td>{!Proyecto}</td>
+    </tr>
+    <tr>
+      <td>VALOR DE ENTRADA</td>
+      <td>$&nbsp;<apex:outputText value="{!valorEntradaUrl}"/></td>
+    </tr>
+    <tr>
+      <td>INGRESO DE UNIDAD FAMILIAR</td>
+      <td>$&nbsp;<apex:outputText value="{!ingresoUF}"/></td>
+    </tr>
+    <tr>
+      <td>GASTO HOGAR DE UNIDAD FAMILIAR</td>
+      <td>$&nbsp;<apex:outputText value="{!gastoUF}"/></td>
+    </tr>
+    <tr>
+      <td>GASTOS FINANCIEROS UNIDAD FAMILIAR (CUOTA ESTIMADA MENSUAL)</td>
+      <td>$&nbsp;<apex:outputText value="0.00"></apex:outputText></td>
+    </tr>
+    <tr>
+      <td>RESTA GASTO FINANCIERO</td>
+      <td>$&nbsp;<apex:outputText value="0.00"></apex:outputText></td>
+    </tr>
+    <tr>
+      <td>PLAZO SOLICITADO</td>
+      <td>{!plazoUrl}</td>
+    </tr>
+    <tr>
+      <td>VALOR DEL BIEN</td>
+      <td>$&nbsp;<apex:outputText value="{!valorBienUrl}"/></td>
+    </tr>
+  </table>
+  <p style="text-align:left;font-weight:bold;">SCORE EQUIFAX: <span style="font-size:20px;">{!Score}</span></p>
+  <p style="text-align:left;font-weight:bold;">SCORE MAX: 999 PUNTAJE AL&nbsp; 
+    <apex:outputText value="{0,date,dd}"><apex:param value="{!NOW()}" /></apex:outputText>&nbsp;-&nbsp;
+    <apex:outputText value="{!CASE(MONTH(DATEVALUE(NOW())),
+        1, 'Enero',
+        2, 'Febrero',
+        3, 'Marzo', 
+        4, 'Abril', 
+        5, 'Mayo', 
+        6, 'Junio',
+        7, 'Julio',
+        8, 'Agosto',
+        9, 'Septiembre',
+        10, 'Octubre',
+        11, 'Noviembre',
+        12, 'Diciembre',
+        '-')}" />&nbsp;-&nbsp;
+    <apex:outputText value="{0,date,yyyy}"><apex:param value="{!NOW()}" /></apex:outputText>  
+  </p>
+  <p style="text-align:left;">Una persona con un Score entre <span style="font-weight:bold;">950 y 964</span> tiene una probabilidad de <span style="font-weight:bold;">2.2%</span> de incurrir en morosidad en el Sistema Crediticio Ecuatoriano.<br/>Importante: el <span style="font-weight:bold;">80%</span> de las personas en el Sistema Crediticio Ecuatoriano tienen un Score menor que el de la persona consultada.<br/><span style="font-weight:bold;">Las variables Score se construyen con información histórica desde noviembre 2016 hasta octubre 2019. Para más detalles del comportamiento crediticio ver el Reporte de Crédito.</span></p>
+  <p style="font-weight:bold;">DECISIÓN (Información actualizada al &nbsp;
+    <apex:outputText value="{0,date,dd}"><apex:param value="{!NOW()}" /></apex:outputText>&nbsp;-&nbsp;
+    <apex:outputText value="{!CASE(MONTH(DATEVALUE(NOW())),
+      1, 'Enero',
+      2, 'Febrero',
+      3, 'Marzo', 
+      4, 'Abril', 
+      5, 'Mayo', 
+      6, 'Junio',
+      7, 'Julio',
+      8, 'Agosto',
+      9, 'Septiembre',
+      10, 'Octubre',
+      11, 'Noviembre',
+      12, 'Diciembre',
+      '-')}" />&nbsp;-&nbsp;
+    <apex:outputText value="{0,date,yyyy}"><apex:param value="{!NOW()}" /></apex:outputText> - Central de Riesgo con Fecha de corte: octubre 2019)
+  </p>
+  <p style="text-align:left;font-weight:bold;">RESULTADO</p> 
+  <table width="100%" border="1">
+    <tr>
+      <td style="width:70%;">SEGMENTACIÓN</td>
+      <td style="width:30%;">{!Segmentacion}</td>
+    </tr>
+    <tr>
+      <td>NIVEL DE INGRESO (PREDICTOR)</td>
+      <td>{!NivelInP}</td>
+    </tr>
+    <tr>
+      <td>VALOR DE ENTRADA APROBADO</td>
+      <td>{!ValorEntA}</td>
+    </tr>
+    <tr>
+      <td>PLAZO</td>
+      <td>{!PlazoRes}</td>
+    </tr>
+    <tr>
+      <td>CUOTA MENSUAL</td>
+      <td>{!CoutaMen}</td>
+    </tr>
+    <tr>
+      <td>CAPACIDAD DE PAGO</td>
+      <td>{!CapPago}</td>
+    </tr>
+  </table>
+  <p style="text-align:left;font-weight:bold;">RESULTADO</p>
+  <table width="100%" border="1">
+    <tr style="font-weight:bold;">
+      <td style="width:40%;">Detalle</td>
+      <td style="width:20%;">V. Entrada(Usd)</td>
+      <td style="width:20%;">Plazo</td>
+      <td style="width:20%;">Cuota(Usd)</td>
+    </tr>
+    <tr>
+      <td>Sugerencia V. Entrada Máximo</td>
+      <td>{!SugVEM}</td>
+      <td>{!SugP1}</td>
+      <td>{!SugC1}</td>
+    </tr>
+    <tr>
+      <td>Sugerencia Plazo Mínimo</td>
+      <td>{!SugPM}</td>
+      <td>{!SugP2}</td>
+      <td>{!SugC2}</td>
+    </tr>
+  </table>
+  <p style="text-align:left;font-weight:bold;">RESULTADO SIMULACIONES</p>
+  <table width="100%" border="1">
+    <tr style="font-weight:bold;">
+      <td style="width:50%">Plazo</td>
+      <td style="width:50%">Cuota</td>
+    </tr>
+    <tr>
+      <td>{!P0}</td>
+      <td>{!C0}</td>
+    </tr>
+    <tr>
+      <td>{!P1}</td>
+      <td>{!C1}</td>
+    </tr>
+    <tr>
+      <td>{!P2}</td>
+      <td>{!C2}</td>
+    </tr>
+    <tr>
+      <td>{!P3}</td>
+      <td>{!C3}</td>
+    </tr>
+    <tr>
+      <td>{!P4}</td>
+      <td>{!C4}</td>
+    </tr>
+  </table>
+  <br/><br/><p style="text-align:left;font-weight:bold;">RESULTADO POLÍTICAS</p>
+  <table width="100%" border="1">
+    <tr style="font-weight:bold;">
+      <td style="width:34">Política</td>
+      <td style="width:33%">Valor</td>
+      <td style="width:33%">Resultado</td>
+    </tr>
+    <tr>
+      <td>{!Pol0}</td>
+      <td>{!Valor0}</td>
+      <td>{!Result0}</td>
+    </tr>
+    <tr>
+      <td>{!Pol1}</td>
+      <td>{!Valor1}</td>
+      <td>{!Result1}</td>
+    </tr>
+    <tr>
+      <td>{!Pol2}</td>
+      <td>{!Valor2}</td>
+      <td>{!Result2}</td>
+    </tr>
+    <tr>
+      <td>{!Pol3}</td>
+      <td>{!Valor3}</td>
+      <td>{!Result3}</td>
+    </tr>
+  </table>
+  <p style="text-align:left;font-weight:bold;">INFORMACIÓN HISTÓRICA INFOCOM EN LOS ÚLTIMOS 36 MESES</p>
+  <div style="width: 100%;"> 
+    <table width="100%" border="1">
+      <tr style="font-weight:bold;">
+        <td style="width:10px;">FECHA CORTE</td>
+        <td style="width:20px;">INSTITUCIÓN</td>
+        <td style="width:10px;">TIPO<br/>DEUDOR</td>
+        <td style="width:10px;">TOTAL<br/>POR<br/>VENCER</td>
+        <td style="width:10px;">TOTAL<br/>VENCIDO</td>
+        <td style="width:10px;">NO<br/>DEVENGA<br/>INTERÉS</td>
+        <td style="width:10px;">DEMANDA<br/>JUDICIAL</td>
+        <td style="width:10px;">CARTERA<br/>CASTIGADA</td>
+        <td style="width:10px;">DÍAS<br/>VENCIDOS</td>
+      </tr> 
+      <apex:repeat value="{!Records}" var="val5">
+          <tr>
+            <td>{!val5.CI_Fecha_corte__c}</td>
+            <td>{!val5.CI_Institucion__c}</td>
+            <td>{!val5.CI_Tipo_deudor__c}</td>
+            <td>{!val5.CI_Total_vencer__c}</td>
+            <td>{!val5.CI_Total_vencido__c}</td>
+            <td>{!val5.CI_No_devenga_interes__c}</td>
+            <td>{!val5.CI_Demanda_judicial__c}</td>
+            <td>{!val5.CI_Cartera_castigada__c}</td>
+            <td>{!val5.CI_Dias_vencidos__c}</td>
+          </tr>
+      </apex:repeat>
+      <!-- tr>
+        <td>{!FechaCorte00}</td>
+        <td>{!Instituacion00}</td>
+        <td>{!TipoDeudor00}</td>
+        <td>{!TotalxVencer00}</td>
+        <td>{!TotalVencido00}</td>
+        <td>{!NDevengaInt00}</td>
+        <td>{!DemandaJud00}</td>
+        <td>{!CarteraCastig00}</td>
+        <td>{!DiasVencidos00}</td>
+      </tr>
+      <tr>
+        <td>{!FechaCorte01}</td>
+        <td>{!Instituacion01}</td>
+        <td>{!TipoDeudor01}</td>
+        <td>{!TotalxVencer01}</td>
+        <td>{!TotalVencido01}</td>
+        <td>{!NDevengaInt01}</td>
+        <td>{!DemandaJud01}</td>
+        <td>{!CarteraCastig01}</td>
+        <td>{!DiasVencidos01}</td>
+      </tr>
+      <tr>
+        <td>{!FechaCorte02}</td>
+        <td>{!Instituacion02}</td>
+        <td>{!TipoDeudor02}</td>
+        <td>{!TotalxVencer02}</td>
+        <td>{!TotalVencido02}</td>
+        <td>{!NDevengaInt02}</td>
+        <td>{!DemandaJud02}</td>
+        <td>{!CarteraCastig02}</td>
+        <td>{!DiasVencidos02}</td>
+      </tr -->
+    </table>
+  </div>
+  <p style="text-align:left;font-weight:bold;">DETALLE DISTRIBUCIÓN DE ENDUEDAMIENTO</p>
+  <div style="width: 100%;">
+    <table width="100%" border="1">
+      <tr style="font-weight:bold;">
+        <td style="width:5px;">Fecha Corte</td>
+        <td style="width:10px;">Institución</td>
+        <td style="width:5px;">Tipo Crédito</td>
+        <td style="width:10px;">Saldo Deuda</td>
+        <td style="width:10px;">Demanda Judicial</td>
+        <td style="width:10px;">Cartera Castigada</td>
+        <td style="width:10px;">Titular</td>
+        <td style="width:10px;">Garante</td>
+        <td style="width:10px;">Codeudor</td>
+        <td style="width:10px;">Tarjeta Crédito</td>
+        <td style="width:10px;">Ac. Conc.</td>
+      </tr>
+      <tr>
+        <td>{!FechaCor00}</td>
+        <td>{!Insti00}</td>
+        <td>{!TipoCre00}</td>
+        <td>{!SaldoDeu00}</td>
+        <td>{!DemanJud00}</td>
+        <td>{!CarteraCast00}</td>
+        <td>{!Titular00}</td>
+        <td>{!Garante00}</td>
+        <td>{!Coddeu00}</td>
+        <td>{!TarCre00}</td>
+        <td>{!AcConc00}</td>
+      </tr>
+      <tr>
+        <td>{!FechaCor01}</td>
+        <td>{!Insti01}</td>
+        <td>{!TipoCre01}</td>
+        <td>{!SaldoDeu01}</td>
+        <td>{!DemanJud01}</td>
+        <td>{!CarteraCast01}</td>
+        <td>{!Titular01}</td>
+        <td>{!Garante01}</td>
+        <td>{!Coddeu01}</td>
+        <td>{!TarCre01}</td>
+        <td>{!AcConc01}</td>
+      </tr>
+      <tr>
+        <td>{!FechaCor02}</td>
+        <td>{!Insti02}</td>
+        <td>{!TipoCre02}</td>
+        <td>{!SaldoDeu02}</td>
+        <td>{!DemanJud02}</td>
+        <td>{!CarteraCast02}</td>
+        <td>{!Titular02}</td>
+        <td>{!Garante02}</td>
+        <td>{!Coddeu02}</td>
+        <td>{!TarCre02}</td>
+        <td>{!AcConc02}</td>
+      </tr>
+      <tr>
+        <td>{!FechaCor03}</td>
+        <td>{!Insti03}</td>
+        <td>{!TipoCre03}</td>
+        <td>{!SaldoDeu03}</td>
+        <td>{!DemanJud03}</td>
+        <td>{!CarteraCast03}</td>
+        <td>{!Titular03}</td>
+        <td>{!Garante03}</td>
+        <td>{!Coddeu03}</td>
+        <td>{!TarCre03}</td>
+        <td>{!AcConc03}</td>
+      </tr>
+      <tr>
+        <td>{!FechaCor04}</td>
+        <td>{!Insti04}</td>
+        <td>{!TipoCre04}</td>
+        <td>{!SaldoDeu04}</td>
+        <td>{!DemanJud04}</td>
+        <td>{!CarteraCast04}</td>
+        <td>{!Titular04}</td>
+        <td>{!Garante04}</td>
+        <td>{!Coddeu04}</td>
+        <td>{!TarCre04}</td>
+        <td>{!AcConc04}</td>
+      </tr>
+    </table>
+  </div>
+  <p style="text-align:left;font-weight:bold;">VALOR ACTUAL DE DEUDA TOTAL REPORTADA EN EL SISTEMA FINANCIERO, REGULADO SB, REGULADO SEPS Y SECTOR COMERCIAL</p>
+  <div style="width: 100%;">
+    <table width="100%" border="1">
+      <tr style="font-weight:bold;">
+        <td style="width:40px;">Acreedor</td>
+        <td style="width:10px;">Por Vencer</td>
+        <td style="width:10px;">No Devenga Intereses</td>
+        <td style="width:10px;">Vencido</td>
+        <td style="width:10px;">Saldo Deuda</td>
+        <td style="width:10px;">Demanda Judicial</td>
+        <td style="width:10px;">Cartera Castigada</td>
+      </tr>
+      <tr>
+        <td>{!Acreedor0}</td>
+        <td>{!PVencer0}</td>
+        <td>{!NDevegaInt0}</td>
+        <td>{!Vencido0}</td>
+        <td>{!SalDeud0}</td>
+        <td>{!DemanJudi0}</td>
+        <td>{!CarteraCasti0}</td>
+      </tr>
+      <tr>
+        <td>{!Acreedor1}</td>
+        <td>{!PVencer1}</td>
+        <td>{!NDevegaInt1}</td>
+        <td>{!Vencido1}</td>
+        <td>{!SalDeud1}</td>
+        <td>{!DemanJudi1}</td>
+        <td>{!CarteraCasti1}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold;">Total</td>
+        <td>{!PVencer2}</td>
+        <td>{!NDevegaInt2}</td>
+        <td>{!Vencido2}</td>
+        <td>{!SalDeud2}</td>
+        <td>{!DemanJudi2}</td>
+        <td>{!CarteraCasti2}</td>
+      </tr>
+    </table>
+  </div>     
+</body>
+</html>
+
+</apex:page>

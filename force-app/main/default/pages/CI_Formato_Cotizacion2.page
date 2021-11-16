@@ -1,0 +1,384 @@
+<apex:page standardController="Cotizacion__c" extensions="CI_apex" renderAs="pdf"  showheader="false" sidebar="false" cache="false" expires="0"
+    applyHtmlTag="false" standardStylesheets="false" showQuickActionVfHeader="false" docType="html-5.0" id="page" applyBodyTag="false">
+
+<html>
+  <head>
+    
+    <style type="text/css" media="print">
+      body{
+          font-size:12px;
+      }  
+      @page {
+          margin-top: 55px;
+          margin-bottom: 55px;
+          margin-left: 55px;
+          margin-right: 55px;
+          @top-center {
+              content: element(header);
+          }
+          @bottom-left {  
+              font-size:12px;    
+              content: "<apex:outputText value="{0,date,dd/MM/yyyy HH:mm:ss a}"><apex:param value="{!NOW()- 0.25002}" /></apex:outputText>, Generado por: {!$User.FirstName} {!$User.LastName}";
+          }
+          @bottom-right {  
+              font-size:12px;    
+              content: "Página " counter(page) " de " counter(pages);
+          }
+      }  
+      .page-break {
+          display:block;
+          page-break-after:always;
+      }
+      div.header {
+          padding: 10px;
+          position: running(header);
+      }
+      div.footer {
+          display: block;
+          padding: 3px;
+          position: running(footer);
+      }            
+      div.subfooter {
+          display: inline-block;
+      }
+    </style> 
+    
+  </head>
+  <body>
+      
+    <apex:form > 
+      
+      <div class="header">
+        
+        <table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+          <tr>
+            <td rowspan="6" style="width:38%;text-align:left;">
+                <apex:repeat value="{!imagenInmueble}" var="itemi1" id="imagenInmueble" rendered="{!IF(imagenInmueble.size>0,true,false)}">
+                    <apex:image width="200" height="200" url="/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId={!itemi1.ContentDocument.LatestPublishedVersionID}"/>
+                </apex:repeat>
+                <apex:image value="{!$Resource.noimage}" width="200" height="200" rendered="{!IF(imagenInmueble.size=0,true,false)}"/>
+            </td>
+            <td style="width:32%;font-weight:bold;text-align:left;vertical-align:bottom;border-bottom:2px solid black;">PROFORMA Nº</td>
+            <td style="width:30%;text-align:left;border-bottom:2px solid black;">
+                <apex:image value="{!$Resource.La_Rioja}" rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA RIOJA',true,false)}" width="100px" height="164px;" />
+                <apex:image value="{!$Resource.La_Gran_Vittoria}" rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA GRAN VITTORIA',true,false)}" width="140px" height="140px;" />
+            </td>
+          </tr>
+          <tr>
+            <td>Nombres y Apellidos: {!Cotizacion__c.CI_Cuenta__r.Name}</td>
+            <td>Telf. Domicilio: {!Cotizacion__c.CI_Cuenta__r.Phone}</td>
+          </tr>
+          <tr>
+            <td>Dirección del Domicilio: {!Cotizacion__c.CI_Cuenta__r.ShippingStreet + Cotizacion__c.CI_Cuenta__r.ShippingCity + Cotizacion__c.CI_Cuenta__r.ShippingState + Cotizacion__c.CI_Cuenta__r.ShippingPostalCode + Cotizacion__c.CI_Cuenta__r.ShippingCountry}</td>
+            <td>Telf. Trabajo: {!Cotizacion__c.CI_Cuenta__r.Telefono_Empresa__c}</td>
+          </tr>
+          <tr>
+            <td>No. Cédula: {!Cotizacion__c.CI_Cuenta__r.CI_Identificacion__c}</td>
+            <td>Celular: {!Cotizacion__c.CI_Cuenta__r.CI_Movil__c}</td>
+          </tr>
+          <tr>
+            <td>E-mail: {!Cotizacion__c.CI_Cuenta__r.CI_Email__c}</td>
+            <td>
+                Estado Civil: 
+                <apex:outputText value="Casado" rendered="{!IF(Cotizacion__c.CI_Cuenta__r.CI_Estado_Civil__c =='C',true,false)}"></apex:outputText>
+                <apex:outputText value="Soltero" rendered="{!IF(Cotizacion__c.CI_Cuenta__r.CI_Estado_Civil__c =='S',true,false)}"></apex:outputText>
+                <apex:outputText value="Divorciado" rendered="{!IF(Cotizacion__c.CI_Cuenta__r.CI_Estado_Civil__c =='D',true,false)}"></apex:outputText>
+                <apex:outputText value="Viudo" rendered="{!IF(Cotizacion__c.CI_Cuenta__r.CI_Estado_Civil__c =='V',true,false)}"></apex:outputText>
+                <apex:outputText value="Unión Libre" rendered="{!IF(Cotizacion__c.CI_Cuenta__r.CI_Estado_Civil__c =='U',true,false)}"></apex:outputText>
+                <apex:outputText value="Casado Separación Bienes" rendered="{!IF(Cotizacion__c.CI_Cuenta__r.CI_Estado_Civil__c =='B',true,false)}"></apex:outputText> 
+            </td>
+          </tr>
+          <tr>
+            <td>Lugar de Trabajo: {!Cotizacion__c.CI_Cuenta__r.Empresa_Actual__c}</td>
+            <td>
+                Fecha de Elaboración: 
+                <apex:outputText value="{0,date,dd}"><apex:param value="{!NOW()}" /></apex:outputText>&nbsp;-&nbsp;
+                <apex:outputText value="{!CASE(MONTH(DATEVALUE(NOW())),
+                    1, 'Enero',
+                    2, 'Febrero',
+                    3, 'Marzo', 
+                    4, 'Abril', 
+                    5, 'Mayo', 
+                    6, 'Junio',
+                    7, 'Julio',
+                    8, 'Agosto',
+                    9, 'Septiembre',
+                    10, 'Octubre',
+                    11, 'Noviembre',
+                    12, 'Diciembre',
+                    '-')}" />&nbsp;-&nbsp;
+                <apex:outputText value="{0,date,yyyy}"><apex:param value="{!NOW()}" /></apex:outputText>  
+            </td>
+          </tr>
+        </table>
+
+      </div>
+      
+      <div class="slds-scope" style="margin-top:240px;">
+        <table border="0" cellpadding="0" cellspacing="0" style="width:100%;height:720px;">
+          <tr>
+            <td rowspan="3" style="width:70%;">
+                <table border="0" cellpadding="0" cellspacing="0" style="width:100%;height:765px;">
+                  <tr>
+                    <td style="width:70%;font-weight:bold;" colspan="7">DETALLE DEL INMUEBLE</td>
+                    </tr>
+                  <tr>
+                    <td style="width:10%;">Proyecto:</td>
+                    <td colspan="2" style="width:35%;">{!Cotizacion__c.CI_Proyecto__r.Name}</td>
+                    <td style="width:5%;">&nbsp;</td>
+                    <td style="width:20%;" colspan="3">Manzana: {!Cotizacion__c.CI_Manzana__r.Name}</td>
+                  </tr>
+                  <tr>
+                    <td>Dirección:</td>
+                    <td colspan="2">{!Cotizacion__c.CI_Proyecto__r.CI_Direccion_Proyecto__c}</td>
+                    <td>&nbsp;</td>
+                    <td colspan="3">Solar: {!Cotizacion__c.Implantaci_n_Principal__r.Lote__r.Name}</td>
+                  </tr>
+                  <tr>
+                    <td>Etapa:</td>
+                    <td colspan="2">{!Cotizacion__c.CI_Etapa__r.Name}</td>
+                    <td>&nbsp;</td>
+                    <td colspan="3">
+                        Area de Terreno: <apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.CI_Terreno__c}" /></apex:outputText> m<sup>2</sup>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Villa Modelo:</td>
+                    <td colspan="2">{!Cotizacion__c.CI_Modelo__r.Name}</td>
+                    <td>&nbsp;</td>
+                    <td colspan="3">
+                        Area de Construcción: <apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.CI_Construccion__c}" /></apex:outputText> m<sup>2</sup>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:bold;" colspan="7">PRINCIPALES CARACTERÍSTICAS:</td>
+                  </tr>
+                  <tr style="text-align:justify;">
+                    <td colspan="7">{!Cotizacion__c.Implantaci_n_Principal__r.Lote__r.CI_Modelo_Casa__r.CI_Caracteristicas__c}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:bold;" colspan="7">PRECIO Y FINANCIAMIENTO</td>
+                  </tr>
+                  <tr>
+                    <td style="width:10%;">Monto Base:</td>
+                    <td style="width:15%;"><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Monto_Base__c}" /></apex:outputText></td>
+                    <td style="width:10%;">Reserva:</td>
+                    <td style="width:10%;"><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.CI_Cuota_Inicial__c}" /></apex:outputText></td>
+                    <td style="width:5%;">&nbsp;</td>
+                    <td style="width:10%;">Crédito  Hipotecario:</td>
+                    <td style="width:10%;"><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Valor_Saldo__c}" /></apex:outputText></td>
+                    </tr>
+                  <tr>
+                    <td>Descuento:</td>
+                    <td>
+                        <apex:outputText value="{0, number, ###,###,###,###.00}" rendered="{!IF(Cotizacion__c.CI_Dscto_Precio__c!=0.00,true,false)}" ><apex:param value="{!Cotizacion__c.CI_Dscto_Precio__c}" /></apex:outputText>
+                        <apex:outputText value="0.00" rendered="{!IF(Cotizacion__c.CI_Dscto_Precio__c=0.00,true,false)}" ></apex:outputText>
+                    </td>
+                    <td>Entrada:</td>
+                    <td>
+                        <apex:outputText value="{0, number, ###,###,###,###.00}" rendered="{!IF(Cotizacion__c.Valor_de_Entrada__c!=0,true,false)}" ><apex:param value="{!Cotizacion__c.Valor_de_Entrada__c}" /></apex:outputText>
+                        <apex:outputText value="0.00" rendered="{!IF(Cotizacion__c.Valor_de_Entrada__c=null,true,false)}" ></apex:outputText>
+                    </td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td>Precio Neto:</td>
+                    <td>
+                        <apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Precio_Venta__c}" /></apex:outputText>
+                    </td>    
+                    <td>Valor a Financiar:</td>
+                    <td>
+                        <apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Valor_de_Entrada__c - Cotizacion__c.CI_Cuota_Inicial__c}" /></apex:outputText>
+                    </td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td>
+                        <apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Porcentaje_Cuota_Inicial__c}" /></apex:outputText>%
+                    </td>
+                    <td colspan="5">Cuota Inicial a convenir con el cliente</td>
+                    <td><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Valor_de_Entrada__c}" /></apex:outputText></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:bold;" colspan="7">ENTRADAS</td>
+                  </tr>
+                  <tr style="text-align:center;font-weight:bold;">
+                    <td>No. Cuota</td>
+                    <td colspan="3">Fecha de Vencimiento</td>
+                    <td colspan="3">Monto</td>
+                  </tr>
+                  <apex:repeat value="{!financiamiento}" var="item2" id="tablaFinanciamiento">
+                      <tr style="text-align:center;">
+                        <td>{!item2.Orden__c}</td>
+                        <td colspan="3"><apex:outputText value="{0,date,dd-MM-yyyy}"><apex:param value="{!item2.Fecha_de_Vencimiento__c}" /></apex:outputText></td>
+                        <td colspan="3"><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!item2.Valor_Saldo__c}" /></apex:outputText></td>
+                      </tr>
+                  </apex:repeat>
+                </table>
+            </td>
+            <td rowspan="3" style="width:2%;height:50%;">&nbsp;</td>
+            <td style="width:30%;height:50%;"><br/>
+                <apex:repeat value="{!imagenPlano1}" var="itemi2" id="imagenPlano01" rendered="{!IF(imagenPlano1.size>0,true,false)}">
+                    <apex:image width="250" height="290" url="/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId={!itemi2.ContentDocument.LatestPublishedVersionID}"/>
+                </apex:repeat>
+                <!-- apex:image value="{!$Resource.noimage}" width="175" height="175" rendered="{!IF(imagenPlano1.size=0,true,false)}"/ -->
+            </td>
+          </tr>
+          <tr>
+            <td style="width:30%;height:50%;">
+                <apex:repeat value="{!imagenPlano2}" var="itemi3" id="imagenPlano02" rendered="{!IF(imagenPlano2.size>0,true,false)}">
+                    <apex:image width="250" height="290" url="/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId={!itemi3.ContentDocument.LatestPublishedVersionID}"/>
+                </apex:repeat>
+                <!-- apex:image value="{!$Resource.noimage}" width="170" height="170" rendered="{!IF(imagenPlano2.size=0,true,false)}"/ -->
+            </td>
+          </tr>
+          <tr>
+            <td style="width:30%;height:50%;text-align:center;">
+                Fecha de emisión:
+                <apex:outputText value="{0,date,dd}"><apex:param value="{!NOW()}" /></apex:outputText>&nbsp;-&nbsp;
+                <apex:outputText value="{!CASE(MONTH(DATEVALUE(NOW())),
+                    1, 'Enero',
+                    2, 'Febrero',
+                    3, 'Marzo', 
+                    4, 'Abril', 
+                    5, 'Mayo', 
+                    6, 'Junio',
+                    7, 'Julio',
+                    8, 'Agosto',
+                    9, 'Septiembre',
+                    10, 'Octubre',
+                    11, 'Noviembre',
+                    12, 'Diciembre',
+                    '-')}" />&nbsp;-&nbsp;
+                <apex:outputText value="{0,date,yyyy HH:mm:ss a}"><apex:param value="{!NOW()- 0.25002}" /></apex:outputText>
+            </td>
+          </tr>
+        </table>
+      </div>
+      
+      <div class="slds-scope" style="margin-top:240px;">
+        <table border="0" cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr>
+            <td width="80%" rowspan="2" style="vertical-align:top !important;">
+                <table border="0" cellpadding="0" cellspacing="0" style="width:100%;display:{!if(financiamiento3.size=0,"none","block")};">
+                  <tr style="text-align:center;font-weight:bold;">
+                    <td width="12%">No. Cuota</td>
+                    <td width="47%">Fecha de Vencimiento</td>
+                    <td width="41%">Monto</td>
+                  </tr>
+                  <apex:repeat value="{!financiamiento3}" var="item3" id="tablaFinanciamiento3">
+                      <tr style="text-align:center;">
+                        <td>{!item3.Orden__c}</td>
+                        <td><apex:outputText value="{0,date,dd-MM-yyyy}"><apex:param value="{!item3.Fecha_de_Vencimiento__c}" /></apex:outputText></td>
+                        <td><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!item3.Valor_Saldo__c}" /></apex:outputText></td>
+                      </tr>
+                  </apex:repeat>
+                </table>
+            </td>
+            <td width="20%">
+                
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align:center;" width="20%" rowspan="10">
+                <apex:repeat value="{!imagenPlano1}" var="itemi2" id="imagenPlano1" rendered="{!IF(imagenPlano1.size>0,true,false)}">
+                    <apex:image width="250" height="290" url="/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId={!itemi2.ContentDocument.LatestPublishedVersionID}"/>
+                </apex:repeat>
+                <!-- apex:image value="{!$Resource.noimage}" width="100" height="100" rendered="{!IF(imagenPlano1.size=0,true,false)}"/ -->  
+                
+                <apex:repeat value="{!imagenPlano2}" var="itemi3" id="imagenPlano2" rendered="{!IF(imagenPlano2.size>0,true,false)}">
+                    <apex:image width="250" height="290" url="/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId={!itemi3.ContentDocument.LatestPublishedVersionID}"/>
+                </apex:repeat>
+                <!-- apex:image value="{!$Resource.noimage}" width="100" height="100" rendered="{!IF(imagenPlano2.size=0,true,false)}"/ -->  
+                
+                Fecha de emisión:
+                <apex:outputText value="{0,date,dd}"><apex:param value="{!NOW()}" /></apex:outputText>&nbsp;-&nbsp;
+                <apex:outputText value="{!CASE(MONTH(DATEVALUE(NOW())),
+                    1, 'Enero',
+                    2, 'Febrero',
+                    3, 'Marzo', 
+                    4, 'Abril', 
+                    5, 'Mayo', 
+                    6, 'Junio',
+                    7, 'Julio',
+                    8, 'Agosto',
+                    9, 'Septiembre',
+                    10, 'Octubre',
+                    11, 'Noviembre',
+                    12, 'Diciembre',
+                    '-')}" />&nbsp;-&nbsp;
+                <apex:outputText value="{0,date,yyyy HH:mm:ss a}"><apex:param value="{!NOW()- 0.25002}" /></apex:outputText>           
+            </td>
+          </tr>
+          <tr style="vertical-align:top !important;">
+            <td rowspan="9" style="vertical-align:top !important;">
+                <table border="0" cellpadding="0" cellspacing="0" style="width:100%;vertical-align:top !important;">
+                  <tr>
+                    <td colspan="2">&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="font-weight:bold;vertical-align:top !important;">Promociones y adicionales:</td>
+                  </tr>
+                  <tr style="vertical-align:top !important;">
+                    <td colspan="2" style="vertical-align:top !important;">
+                        <apex:dataTable value="{!promosCotiza}" var="item" id="tablaPromos" style="width:100%;" styleClass="slds-table slds-table_bordered slds-table_fixed-layout">
+                            <apex:column headerValue="" >
+                                <apex:outputField value="{!item.Promocion__r.Name}"/>
+                            </apex:column>
+                            <apex:column headerValue="" > 
+                                <apex:outputText value="0.00" rendered="{!IF(item.Valor_Promocion__c=0,true,false)}"></apex:outputText>
+                                <apex:outputText value="{0, number, ###,###,###,###.00}" rendered="{!IF(item.Valor_Promocion__c!=0,true,false)}"><apex:param value="{!item.Valor_Promocion__c}" /></apex:outputText>
+                            </apex:column>                           
+                        </apex:dataTable>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="2">&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2">Ejecutivo de Ventas: {!Cotizacion__c.Oportunidad__r.Owner.Name}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2">Teléfono: {!Cotizacion__c.Oportunidad__r.Owner.Phone} EXT. {!Cotizacion__c.Oportunidad__r.Owner.Extension}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="border-bottom:1px solid black;">Celular: {!Cotizacion__c.Oportunidad__r.Owner.MobilePhone} Email: {!Cotizacion__c.Oportunidad__r.Owner.Email}</td>
+                  </tr>
+                  <tr>
+                    <td width="10%" rowspan="4"><apex:image value="{!$Resource.CII_Logo}" width="45" /></td>
+                    <td>NOTA: Los precios pueden ser modificados sin previo aviso.</td>
+                  </tr>
+                  <tr>
+                    <td width="90%">
+                        <apex:outputText value="ACIREALE S.A." rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA GRAN VITTORIA',true,false)}" />
+                        <apex:outputText value="FERRICOMP S.A." rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA RIOJA',true,false)}" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>AV. CARLOS LUIS PLAZA DAÑIN #300 C.C. PLAZA QUIL LOCAL &nbsp;
+                        <apex:outputText value="12" rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA GRAN VITTORIA',true,false)}" />
+                        <apex:outputText value="14-15-16" rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA RIOJA',true,false)}" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>PBX: 042282682 Web: &nbsp; 
+                        <apex:outputText value="www.vittoria.com.ec" rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA GRAN VITTORIA',true,false)}" />
+                        <apex:outputText value="www.larioja.ec" rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA RIOJA',true,false)}" />
+                    </td>
+                  </tr>
+                </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+    </apex:form>
+
+  </body>
+</html>
+
+</apex:page>

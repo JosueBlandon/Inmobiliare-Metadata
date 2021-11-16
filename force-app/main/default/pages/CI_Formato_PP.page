@@ -1,0 +1,363 @@
+<apex:page standardController="Cotizacion__c" extensions="CI_apex" renderAs="pdf" showheader="false" sidebar="false" cache="false" expires="0"
+    applyHtmlTag="false" standardStylesheets="false" showQuickActionVfHeader="false" docType="html-5.0" id="page" applyBodyTag="false">
+    
+<html>
+  <head>
+
+    <style type="text/css" media="print">
+      body{
+          font-size:12px;
+      }  
+      @page {
+          margin-top: 55px;
+          margin-bottom: 55px;
+          margin-left: 55px;
+          margin-right: 55px;
+          @top-center {
+              content: element(header);
+          }
+          @bottom-left {  
+              font-size:8px;    
+              content: "LOS PAGOS DEBEN REALIZARSE EN LA EMPRESA PUNTUALMENTE, CON CHEQUE CRUZADO O DEPOSITO A FAVOR DE &nbsp;<apex:outputText value="ACIREALE S.A." rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA GRAN VITTORIA',true,false)}" /><apex:outputText value="FERRICOMP S.A." rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA RIOJA',true,false)}" />\A LOS PAGOS REALIZADOS EN FECHAS POSTERIORES A LAS ESTABLECIDAS EN ESTE DOCUMENTO, GENERARÁN INTERÉS MORATORIO. \A SOLO EL PAGO PUNTUAL, DARÁ AL CLIENTE DERECHO A RECIBIR EL BENEFICIO DE LAS PROMOCIONES.";
+              white-space: pre;
+          }
+          @bottom-right {  
+              font-size:12px;    
+              content: "Página " counter(page) " de " counter(pages);
+          }                    
+      }  
+      .page-break {
+          display:block;
+          page-break-after:always;
+      }
+      div.header {
+          padding: 10px;
+          position: running(header);
+      }
+      div.footer {
+          display: block;
+          padding: 3px;
+          position: running(footer);
+      }            
+      div.subfooter {
+          display: inline-block;
+      }
+    </style>
+  
+  </head>
+  <body>
+  
+    <apex:form >
+   
+        <div class="header">
+       
+            <table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+                <tbody>
+                    <tr>
+                        <td style="width:20%;text-align:center;" rowspan="6">
+                            <apex:image value="{!$Resource.La_Rioja}" rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA RIOJA',true,false)}" width="100px" height="164px;" />
+                            <apex:image value="{!$Resource.La_Gran_Vittoria}" rendered="{!IF(Cotizacion__c.CI_Proyecto__r.Name=='LA GRAN VITTORIA',true,false)}" width="140px" height="140px;" />
+                        </td>
+                        <td style="width:50%;">&nbsp;</td>
+                        <td style="width:10%;"></td>
+                        <td style="width:10%;"></td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>Fecha:</td>
+                        <td><apex:outputText value="{0,date,dd}"><apex:param value="{!NOW()}" /></apex:outputText>&nbsp;-&nbsp;
+                            <apex:outputText value="{!CASE(MONTH(DATEVALUE(NOW())),
+                                    1, 'Enero',
+                                    2, 'Febrero',
+                                    3, 'Marzo', 
+                                    4, 'Abril', 
+                                    5, 'Mayo', 
+                                    6, 'Junio',
+                                    7, 'Julio',
+                                    8, 'Agosto',
+                                    9, 'Septiembre',
+                                    10, 'Octubre',
+                                    11, 'Noviembre',
+                                    12, 'Diciembre',
+                                    '-')}" />&nbsp;-&nbsp;
+                            <apex:outputText value="{0,date,yyyy}"><apex:param value="{!NOW()}" /></apex:outputText>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td><apex:outputText value="{0,date,HH:mm:ss a}"><apex:param value="{!NOW()- 0.25002}" /></apex:outputText></td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>Usuario:</td>
+                        <td>{!Cotizacion__c.Oportunidad__r.Owner.Name}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:center;font-weight:bold;font-size:25px;">PLAN DE PAGOS</td>
+                        <td>F. Ing. Perfil:</td>
+                        <td>
+                            <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                <apex:param value="{!Cotizacion__c.CI_Cuenta__r.CreatedDate}" /> 
+                            </apex:outputText>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:center;font-weight:bold;font-size:18px;">No. Venta {!Cotizacion__c.Codigo_Venta__c}</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <table border="0" cellpadding="0" cellspacing="0" style="width:100%; border:1px groove black;">
+                <tbody>
+                    <tr>
+                        <td style="width:15%;">Cliente:</td>
+                        <td style="width:30%;">{!Cotizacion__c.CI_Cuenta__r.Name}</td>
+                        <td style="width:10%;">&nbsp;</td>
+                        <td style="width:15%;">Cédula:</td>
+                        <td style="width:30%;">{!Cotizacion__c.CI_Cuenta__r.CI_Identificacion__c}</td>
+                    </tr>
+                    <tr>
+                        <td>Dirección:</td>
+                        <td>{!Cotizacion__c.CI_Cuenta__r.ShippingStreet + Cotizacion__c.CI_Cuenta__r.ShippingCity + Cotizacion__c.CI_Cuenta__r.ShippingState + Cotizacion__c.CI_Cuenta__r.ShippingPostalCode + Cotizacion__c.CI_Cuenta__r.ShippingCountry}</td>
+                        <td>&nbsp;</td>
+                        <td>Télefonos:</td>
+                        <td>{!Cotizacion__c.CI_Cuenta__r.Phone} - {!Cotizacion__c.CI_Cuenta__r.Telefono_Empresa__c}</td>
+                    </tr>
+                    <tr>
+                        <td>Ejecutivo Vtas:</td>
+                        <td>{!Cotizacion__c.Oportunidad__r.Owner.Name}</td>
+                        <td>&nbsp;</td>
+                        <td>Fecha Vta:</td>
+                        <td>{!Cotizacion__c.Fecha_Venta__c}</td>
+                    </tr>
+                    <tr>
+                        <td>Oficial de Crédito:</td>
+                        <td>{!Cotizacion__c.CI_Oficial_Credito__c}</td>
+                        <td>&nbsp;</td>
+                        <td>Oficial de Cobranza:</td>
+                        <td>{!Cotizacion__c.CI_Oficial_Cobranza__c}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3 style="text-align:center;">DESCRIPCIÓN DEL INMUEBLE</h3>
+            
+            <table border="0" cellpadding="0" cellspacing="0" style="width:100%; border:1px groove black;">
+                <tbody>
+                    <tr>
+                        <td style="width:8%;">Proyecto:</td>
+                        <td style="width:20%;">{!Cotizacion__c.CI_Proyecto__r.Name}</td>
+                        <td style="width:5%;">&nbsp;</td>
+                        <td style="width:10%;">Etapa:</td>
+                        <td style="width:17%;">{!Cotizacion__c.CI_Etapa__r.Name}</td>
+                        <td style="width:5%;">&nbsp;</td>
+                        <td style="width:13%;">Modelo:</td>
+                        <td style="width:22%;">{!Cotizacion__c.CI_Modelo__r.Name}</td>
+                    </tr>
+                    <tr>
+                        <td>Ubicación:</td>
+                        <td>{!Cotizacion__c.CI_Manzana__r.Name + ' - ' + Cotizacion__c.CI_Inmueble__c}</td>
+                        <td>&nbsp;</td>
+                        <td>M<sup>2</sup> Terreno:</td>
+                        <td><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.CI_Terreno__c}" /></apex:outputText></td>
+                        <td>&nbsp;</td>
+                        <td>M<sup>2</sup> Construcción:</td>
+                        <td><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.CI_Construccion__c}" /></apex:outputText></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3 style="text-align:center;">FINANCIAMIENTO</h3>
+            
+            <table border="0" cellpadding="0" cellspacing="0" style="width:100%; border:1px groove black;">
+                <tbody>
+                    <tr>
+                        <td style="width:10%;">Monto Base:</td>
+                        <td style="width:20%;"><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Monto_Base__c}" /></apex:outputText></td>
+                        <td style="width:15%;">Cuota de Entrada:</td>
+                        <td style="width:10%;">
+                            <apex:outputText value="{0, number, ###,###,###,###.00}" rendered="{!IF(Cotizacion__c.Valor_de_Entrada__c!=0,true,false)}" ><apex:param value="{!Cotizacion__c.Valor_de_Entrada__c}" /></apex:outputText>
+                            <apex:outputText value="0.00" rendered="{!IF(Cotizacion__c.Valor_de_Entrada__c=null,true,false)}" ></apex:outputText>
+                        </td>
+                        <td style="width:10%;">&nbsp;</td>
+                        <td style="width:20%;">Crédito Hipotecario</td>
+                        <td style="width:15%;"><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Valor_Saldo__c}" /></apex:outputText></td>
+                    </tr>
+                    <tr>
+                        <td>Adicionales:</td>
+                        <td style="position:relative !important;top:-350px !important;">
+                          <apex:outputText value="{0, number, ###,###,###,###.00}" rendered="{!IF(Cotizacion__c.CI_Obras_Ad__c!=0,true,false)}" ><apex:param value="{!Cotizacion__c.CI_Obras_Ad__c}"/></apex:outputText>
+                          <apex:outputText value="0.00" rendered="{!IF(Cotizacion__c.CI_Obras_Ad__c=null,true,false)}"></apex:outputText> 
+                        </td>
+                        <td>Porcentaje Entrada:</td>
+                        <td><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Porcentaje_Cuota_Entrada__c}" /></apex:outputText>%</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Total:</td>
+                        <td>
+                            <apex:outputText value="{0, number, ###,###,###,###.00}" rendered="{!IF(Cotizacion__c.CI_Obras_Ad__c!=0,true,false)}" ><apex:param value="{!Cotizacion__c.Monto_Base__c + Cotizacion__c.CI_Obras_Ad__c}" /></apex:outputText>
+                            <apex:outputText value="{0, number, ###,###,###,###.00}" rendered="{!IF(Cotizacion__c.CI_Obras_Ad__c=null,true,false)}" ><apex:param value="{!Cotizacion__c.Monto_Base__c}" /></apex:outputText>
+                        </td>
+                        <td>Reserva:</td>
+                        <td><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.CI_Cuota_Inicial__c}" /></apex:outputText></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Descuento:</td>
+                        <td>
+                            <apex:outputText value="{0, number, ###,###,###,###.00}" rendered="{!IF(Cotizacion__c.CI_Dscto_Precio__c!=0.00,true,false)}" ><apex:param value="{!Cotizacion__c.CI_Dscto_Precio__c}" /></apex:outputText>
+                            <apex:outputText value="0.00" rendered="{!IF(Cotizacion__c.CI_Dscto_Precio__c=0.00,true,false)}" ></apex:outputText>
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Precio Neto:</td>
+                        <td>
+                            <apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Precio_Venta__c}" /></apex:outputText> 
+                        </td>
+                        <td>Valor a financiar:</td>
+                        <td><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!Cotizacion__c.Valor_de_Entrada__c - Cotizacion__c.CI_Cuota_Inicial__c}" /></apex:outputText></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </tbody>
+            </table>
+           
+        </div> 
+          
+      <div class="slds-scope" style="margin-top:370px;">
+                        
+            <h3 style="text-align:center;">CUOTAS DE ENTRADAS</h3>
+            
+            <table border="0" cellpadding="0" cellspacing="0" style="width:100%;height:910px;">
+                <tbody>
+                    <tr style="text-align:center;">
+                        <td style="" colspan="2">No.</td>
+                        <td style="" colspan="2">Fecha de Vencimiento</td>
+                        <td style="" colspan="3">Monto</td>
+                    </tr> 
+                    <apex:repeat value="{!Financiamiento4}" var="item2" id="tablaFinanciamiento">
+                        <tr style="text-align:center;vertical-align:top;">
+                            <td style="border-bottom:1px groove black;" colspan="2">{!item2.Orden__c}</td>
+                            <td style="border-bottom:1px groove black;" colspan="2"><apex:outputText value="{0,date,dd-MM-yyyy}"><apex:param value="{!item2.Fecha_de_Vencimiento__c}" /></apex:outputText></td>
+                            <td style="border-bottom:1px groove black;" colspan="3"><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!item2.Valor_Saldo__c}" /></apex:outputText></td>
+                        </tr>    
+                    </apex:repeat>
+                </tbody>
+            </table>
+            
+            <div class="slds-scope" style="display:{!if(financiamiento2.size=0,"none","block")};">
+                        
+                <h4 style="text-align:center;">CUOTAS DE ENTRADAS</h4>
+                
+                <table style="width:100%;" border="0" cellspacing="0" cellpadding="0">
+                  <tr style="text-align:center;">
+                    <td width="10%">No.</td>
+                    <td width="60%">Fecha de Vencimiento</td>
+                    <td width="50%">Monto</td>
+                  </tr>
+                  <apex:repeat value="{!Financiamiento2}" var="item3" id="tablaFinanciamiento2">
+                      <tr style="text-align:center;vertical-align:top;">
+                        <td style="border-bottom:1px groove black;">{!item3.Orden__c}</td>
+                        <td style="border-bottom:1px groove black;"><apex:outputText value="{0,date,dd-MM-yyyy}"><apex:param value="{!item3.Fecha_de_Vencimiento__c}" /></apex:outputText></td>
+                        <td style="border-bottom:1px groove black;"><apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!item3.Valor_Saldo__c}" /></apex:outputText></td>
+                      </tr>
+                  </apex:repeat>
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                </table>
+
+            </div> 
+            
+            <h4 style="text-align:left;">Observaciones:</h4>
+            
+        <table style="width:100%; height:312px;" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <tr>
+                        <td style="width:48%;vertical-align:top;" colspan="2">
+                            <apex:dataTable value="{!promos}" var="item" id="tablaPromos" style="width:100%;" styleClass="slds-table slds-table_bordered slds-table_fixed-layout">
+                                <apex:column headerValue="PROMOCION" >
+                                    <apex:outputField value="{!item.Promocion__r.Name}"/>
+                                </apex:column>
+                                <apex:column headerValue="VALOR" >
+                                    <apex:outputText value="0.00"><apex:param value="0.00" /></apex:outputText>
+                                </apex:column>                           
+                            </apex:dataTable>   
+                        </td>
+                        <td style="width:4%;">&nbsp;</td>
+                        <td style="width:48%;vertical-align:top;" colspan="2">
+                            <apex:dataTable value="{!adic}" var="item4" id="tablaAdic" style="width:100%;" styleClass="slds-table slds-table_bordered slds-table_fixed-layout">
+                                <apex:column headerValue="ADICIONALES" >
+                                    <apex:outputField value="{!item4.Promocion__r.Name}"/>
+                                </apex:column>
+                                <apex:column headerValue="VALOR" >
+                                    <apex:outputText value="{0, number, ###,###,###,###.00}"><apex:param value="{!item4.Valor_Promocion__c}" /></apex:outputText>
+                                </apex:column>                           
+                            </apex:dataTable>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold;border-bottom:1px solid black;">Total:&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        <td style="text-align:center;font-weight:bold;border-bottom:1px solid black;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.00</td>
+                        <td>&nbsp;</td>
+                        <td style="font-weight:bold;border-bottom:1px solid black;">Total:</td>
+                        <td style="font-weight:bold;border-bottom:1px solid black;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                          
+                          <apex:outputText value="{0, number, ###,###,###,###.00}" rendered="{!IF(sumAdicionales!=0,true,false)}" ><apex:param value="{!sumAdicionales}"/></apex:outputText>
+                          <apex:outputText value="0.00" rendered="{!IF(sumAdicionales=0,true,false)}"></apex:outputText>                       
+                        </td>
+                    </tr>
+                </tbody>
+          </table>
+          
+          <table border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-top:-14px;">
+              <tbody>
+                <tr>
+                      <td style="width:5%;">&nbsp;</td>
+                      <td style="width:40%;text-align:center;border-top:1px solid black;text-transform: uppercase;">{!Cotizacion__c.CI_Cuenta__r.Name}</td>
+                      <td style="width:10%;">&nbsp;</td>
+                      <td style="width:40%;text-align:center;border-top:1px solid black;text-transform: uppercase;">{!Cotizacion__c.CI_Cuenta__r.CI_Nombre_C__c + ' ' + Cotizacion__c.CI_Cuenta__r.CI_Apellidos_C__c}</td>
+                      <td style="width:5%;">&nbsp;</td>
+                </tr> 
+                <tr>
+                      <td style="width:5%;">&nbsp;</td>
+                      <td style="width:40%;text-align:center;text-transform: uppercase;">{!Cotizacion__c.CI_Cuenta__r.CI_Identificacion__c}</td>
+                      <td style="width:10%;">&nbsp;</td>
+                      <td style="width:40%;text-align:center;text-transform: uppercase;">{!Cotizacion__c.CI_Cuenta__r.CI_Identificacion_C__c}</td>
+                      <td style="width:5%;">&nbsp;</td>
+                </tr>
+                           
+              </tbody>
+          </table>
+            
+        </div> 
+    
+    </apex:form>  
+  
+  </body>
+</html>
+</apex:page>

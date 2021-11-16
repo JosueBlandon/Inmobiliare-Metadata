@@ -1,0 +1,1709 @@
+<apex:page standardController="Opportunity" extensions="CI_apex_equifax" sidebar="false" showHeader="false" standardStylesheets="false" docType="html-5.0"  showChat="true">
+
+<html xmlns="https://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en">
+
+  <head>
+  
+    <apex:slds /> 
+    
+    <script src="{!Urlfor($Resource.Resource,'js/jquery-1.12.3.js')}"></script>
+    <script src="{!Urlfor($Resource.Resource,'js/connection.js')}"></script>
+    
+    <style>
+    #ToastMessage2 {
+      position: fixed;
+      extendedTimeOut: 40;
+      top: 20%;
+      left: 50%;
+      -webkit-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+    </style>
+    
+    <script>
+    function toastLaunch2(){
+      var element = document.getElementById("ToastMessage2");
+      element.classList.toggle("slds-hidden");  
+    }
+    </script>
+    
+    <script>
+    sforce.connection.sessionId = '{!$Api.Session_ID}'; 
+    $(document).ready( function () {  
+      var TipoIdenti = '{!Opportunity.Account.CI_Tipo_Identi__c}';
+      var numeroDocumento = '{!Opportunity.Account.CI_Identificacion__c}';
+      var numeroDocumento = '{!Opportunity.Account.CI_Identificacion__c}';
+      var Proyecto = '{!Opportunity.Account.CI_Proyecto__r.Name}';
+      var Etapa = '{!Opportunity.StageName}'; /*alert(Etapa);*/ if(Etapa == 'Vendida' || Etapa == 'No negociada') { $("[id$='consultarEqx']").attr("disabled","true"); toastLaunch2(); }
+      if (TipoIdenti == '2') {
+          document.getElementById("TipoIdenti").value = 'C';
+      }
+      $("[id$='numeroDocumento']").val(numeroDocumento);
+      document.getElementById("Proyecto").value = Proyecto;    
+      
+      if(Proyecto == 'LA RIOJA') { 
+        $("[id$='tipoProyecto']").val('LARI');
+      } else if(Proyecto == 'LA GRAN VITTORIA') { 
+        $("[id$='tipoProyecto']").val('VITT');
+      }       
+    } );
+    function vecesConsultadas() {
+        var idOpor = '{!Opportunity.Id}'; //alert(idOpor);
+        recOportunidad = sforce.connection.query("SELECT Id, Name, Consultas_Equifax__c FROM Opportunity WHERE Id='"+idOpor+"'"); //alert(recOportunidad);      
+        var recOpor = recOportunidad.getArray('records'); //alert(recOpor);     
+        try {
+            var updateOpor = new sforce.SObject("Opportunity");
+            updateOpor.Id = recOpor[0].Id;
+            updateOpor.Consultas_Equifax__c = parseInt(recOpor[0].Consultas_Equifax__c)+1;    
+            result = sforce.connection.update([updateOpor]);
+            //alert('Datos Actualizados '+result[0].id); 
+            //console.log(result);
+        } catch(err) {
+            alert(err);
+        }
+    }
+    </script>
+    
+    <script>
+    function cargareventosAll(valores,valores2,valores3,valores4,valores5,valores6,valores7) {  //console.log(valores); console.log(valores2); console.log(valores3); console.log(valores4); console.log(valores5); console.log(valores6); console.log(valores7); 
+      if(valores.length == 0 && valores2.length == 0 && valores3.length == 0 && valores4.length == 0 && valores5.length == 0 && valores6.length == 0 && valores7.length == 0) {
+        document.getElementById('resultadoEquifax').style.display = 'block';
+      }  
+    }
+    function cleanAll() {
+    
+      document.getElementById("Segmentacion").value = '';
+      document.getElementById("NivelInP").value = '';
+      document.getElementById("ValorEntA").value = '';
+      document.getElementById("PlazoRes").value = '';
+      document.getElementById("CoutaMen").value = '';
+      document.getElementById("CapPago").value = '';
+      
+      document.getElementById("SugVEM").value = '';
+      document.getElementById("SugP1").value = '';
+      document.getElementById("SugC1").value = '';
+      document.getElementById("SugPM").value = '';
+      document.getElementById("SugP2").value = '';
+      document.getElementById("SugC2").value = '';
+      
+      document.getElementById("P0").value = '';
+      document.getElementById("C0").value = '';        
+      document.getElementById("P1").value = '';
+      document.getElementById("C1").value = '';      
+      document.getElementById("P2").value = '';
+      document.getElementById("C2").value = '';
+      document.getElementById("P3").value = '';
+      document.getElementById("C3").value = '';
+      document.getElementById("P4").value = '';
+      document.getElementById("C4").value = '';
+      
+      document.getElementById("Pol0").value = '';
+      document.getElementById("Valor0").value = '';
+      document.getElementById("Result0").value = '';
+      document.getElementById("Pol1").value = '';
+      document.getElementById("Valor1").value = '';
+      document.getElementById("Result1").value = ''; 
+      document.getElementById("Pol2").value = '';
+      document.getElementById("Valor2").value = '';
+      document.getElementById("Result2").value = '';     
+      document.getElementById("Pol3").value = '';
+      document.getElementById("Valor3").value = '';
+      document.getElementById("Result3").value = '';
+      
+      document.getElementById("FechaCorte00").value = '';
+      document.getElementById("Instituacion00").value = '';
+      document.getElementById("TipoDeudor00").value = '';
+      document.getElementById("TotalxVencer00").value = '';
+      document.getElementById("TotalVencido00").value = '';
+      document.getElementById("NDevengaInt00").value = '';
+      document.getElementById("DemandaJud00").value = '';
+      document.getElementById("CarteraCastig00").value = '';
+      document.getElementById("DiasVencidos00").value = '';
+      
+      document.getElementById("FechaCorte01").value = '';
+      document.getElementById("Instituacion01").value = '';
+      document.getElementById("TipoDeudor01").value = '';
+      document.getElementById("TotalxVencer01").value = '';
+      document.getElementById("TotalVencido01").value = '';
+      document.getElementById("NDevengaInt01").value = '';
+      document.getElementById("DemandaJud01").value = '';
+      document.getElementById("CarteraCastig01").value = '';
+      document.getElementById("DiasVencidos01").value = '';
+      
+      document.getElementById("FechaCorte02").value = '';
+      document.getElementById("Instituacion02").value = '';
+      document.getElementById("TipoDeudor02").value = '';
+      document.getElementById("TotalxVencer02").value = '';
+      document.getElementById("TotalVencido02").value = '';
+      document.getElementById("NDevengaInt02").value = '';
+      document.getElementById("DemandaJud02").value = '';
+      document.getElementById("CarteraCastig02").value = '';
+      document.getElementById("DiasVencidos02").value = '';       
+      
+      document.getElementById("FechaCor00").value = '';
+      document.getElementById("Insti00").value = '';
+      document.getElementById("TipoCre00").value = '';
+      document.getElementById("SaldoDeu00").value = '';
+      document.getElementById("DemanJud00").value = '';
+      document.getElementById("CarteraCast00").value = '';
+      document.getElementById("Titular00").value = '';
+      document.getElementById("Garante00").value = '';
+      document.getElementById("Coddeu00").value = '';   
+      document.getElementById("TarCre00").value = '';   
+      document.getElementById("AcConc00").value = '';
+      
+      document.getElementById("FechaCor01").value = '';
+      document.getElementById("Insti01").value = '';
+      document.getElementById("TipoCre01").value = '';
+      document.getElementById("SaldoDeu01").value = '';
+      document.getElementById("DemanJud01").value = '';
+      document.getElementById("CarteraCast01").value = '';
+      document.getElementById("Titular01").value = '';
+      document.getElementById("Garante01").value = '';
+      document.getElementById("Coddeu01").value = '';   
+      document.getElementById("TarCre01").value = '';   
+      document.getElementById("AcConc01").value = '';
+      
+      document.getElementById("FechaCor02").value = '';
+      document.getElementById("Insti02").value = '';
+      document.getElementById("TipoCre02").value = '';
+      document.getElementById("SaldoDeu02").value = '';
+      document.getElementById("DemanJud02").value = '';
+      document.getElementById("CarteraCast02").value = '';
+      document.getElementById("Titular02").value = '';
+      document.getElementById("Garante02").value = '';
+      document.getElementById("Coddeu02").value = '';   
+      document.getElementById("TarCre02").value = '';   
+      document.getElementById("AcConc02").value = '';
+
+      document.getElementById("FechaCor03").value = '';
+      document.getElementById("Insti03").value = '';
+      document.getElementById("TipoCre03").value = '';
+      document.getElementById("SaldoDeu03").value = '';
+      document.getElementById("DemanJud03").value = '';
+      document.getElementById("CarteraCast03").value = '';
+      document.getElementById("Titular03").value = '';
+      document.getElementById("Garante03").value = '';
+      document.getElementById("Coddeu03").value = '';   
+      document.getElementById("TarCre03").value = '';   
+      document.getElementById("AcConc03").value = '';
+      
+      document.getElementById("FechaCor04").value = '';
+      document.getElementById("Insti04").value = '';
+      document.getElementById("TipoCre04").value = '';
+      document.getElementById("SaldoDeu04").value = '';
+      document.getElementById("DemanJud04").value = '';
+      document.getElementById("CarteraCast04").value = '';
+      document.getElementById("Titular04").value = '';
+      document.getElementById("Garante04").value = '';
+      document.getElementById("Coddeu04").value = '';   
+      document.getElementById("TarCre04").value = '';   
+      document.getElementById("AcConc04").value = '';
+      
+      document.getElementById("Acreedor0").value = '';
+      document.getElementById("PVencer0").value = '';
+      document.getElementById("NDevegaInt0").value = '';
+      document.getElementById("Vencido0").value = '';
+      document.getElementById("SalDeud0").value = '';
+      document.getElementById("DemanJudi0").value = '';
+      document.getElementById("CarteraCasti0").value = '';
+      
+      document.getElementById("Acreedor1").value = '';
+      document.getElementById("PVencer1").value = '';
+      document.getElementById("NDevegaInt1").value = '';
+      document.getElementById("Vencido1").value = '';
+      document.getElementById("SalDeud1").value = '';
+      document.getElementById("DemanJudi1").value = '';
+      document.getElementById("CarteraCasti1").value = '';
+      
+      document.getElementById("PVencer2").value = '';
+      document.getElementById("NDevegaInt2").value = '';
+      document.getElementById("Vencido2").value = '';
+      document.getElementById("SalDeud2").value = '';
+      document.getElementById("DemanJudi2").value = '';
+      document.getElementById("CarteraCasti2").value = '';
+ 
+    }
+    function cargareventos(valores) {  console.log(valores);       
+    
+      for (var i = 0; i < valores.length; i++) {
+      
+        vecesConsultadas();   
+        
+        document.getElementById('resultadoEquifax').style.display = 'none';    
+        
+        document.getElementById("print").disabled = false;
+      
+        var Segmentacion = valores[i].SegmentacionCliente;
+        var RangosIngresos = valores[i].RangosIngresos;
+        var ValorEntradaAprobado = valores[i].ValorEntradaAprobado;
+        var Plazo = valores[i].Plazo;
+        var CuotaMensual = valores[i].CuotaMensual;
+        var CapacidadPago = valores[i].CapacidadPago;
+        
+        document.getElementById("Segmentacion").value = Segmentacion;
+        document.getElementById("NivelInP").value = RangosIngresos;
+        document.getElementById("ValorEntA").value = ValorEntradaAprobado;
+        document.getElementById("PlazoRes").value = Plazo;
+        document.getElementById("CoutaMen").value = CuotaMensual;
+        document.getElementById("CapPago").value = CapacidadPago;
+        
+      }   
+      
+    }
+    
+    function cargareventos2(valores2) {  console.log(valores2);       
+    
+      if (valores2.length > 0) {
+      var Entrada = valores2[0].Entrada;
+      var Plazo = valores2[0].Plazo;
+      var Cuota = valores2[0].Cuota;
+        
+      document.getElementById("SugVEM").value = Entrada;
+      document.getElementById("SugP1").value = Plazo;
+      document.getElementById("SugC1").value = Cuota;
+        
+      var Entrada2 = valores2[1].Entrada;
+      var Plazo2 = valores2[1].Plazo;
+      var Cuota2 = valores2[1].Cuota;
+        
+      document.getElementById("SugPM").value = Entrada2;
+      document.getElementById("SugP2").value = Plazo2;
+      document.getElementById("SugC2").value = Cuota2;  
+      }
+      
+    }
+    
+    function cargareventos3(valores3) {  console.log(valores3);       
+    
+      var Plazo = valores3[0].Plazo;
+      var Cuota = valores3[0].Cuota;
+        
+      document.getElementById("P0").value = Plazo;
+      document.getElementById("C0").value = Cuota;
+        
+      var Plazo1 = valores3[1].Plazo;
+      var Cuota1 = valores3[1].Cuota;
+        
+      document.getElementById("P1").value = Plazo1;
+      document.getElementById("C1").value = Cuota1;
+        
+      var Plazo2 = valores3[2].Plazo;
+      var Cuota2 = valores3[2].Cuota;
+        
+      document.getElementById("P2").value = Plazo2;
+      document.getElementById("C2").value = Cuota2;
+
+      var Plazo3 = valores3[3].Plazo;
+      var Cuota3 = valores3[3].Cuota;
+        
+      document.getElementById("P3").value = Plazo3;
+      document.getElementById("C3").value = Cuota3;
+        
+      var Plazo4 = valores3[4].Plazo;
+      var Cuota4 = valores3[4].Cuota;
+        
+      document.getElementById("P4").value = Plazo4;
+      document.getElementById("C4").value = Cuota4;  
+      
+    }
+    var Valor = 0;
+    function cargareventos4(valores4) {  console.log(valores4); 
+      var Politica = valores4[0].Politica;
+      Valor = valores4[0].Valor;
+      var Resultado = valores4[0].Resultado;
+        
+      document.getElementById("Pol0").value = Politica;
+      document.getElementById("Valor0").value = Valor;
+      document.getElementById("Result0").value = Resultado;
+      
+      // -- Insertar Valor de Score -- //
+      var idOpor = '{!Opportunity.Id}'; //alert(idOpor);
+      recOportunidad = sforce.connection.query("SELECT Id, Name, CI_Score__c FROM Opportunity WHERE Id='"+idOpor+"'");       
+      var recOpor = recOportunidad.getArray('records'); //alert(recOpor);     
+      try {
+          var updateOpor = new sforce.SObject("Opportunity");
+          updateOpor.Id = recOpor[0].Id;
+          updateOpor.CI_Score__c = parseInt(Valor);    
+          result = sforce.connection.update([updateOpor]);
+          //alert('Datos Actualizados '+result[0].id); 
+      } catch(err) {
+          alert(err);
+      }
+      // -- Insertar Valor de Score -- //  
+        
+      var Politica1 = valores4[1].Politica;
+      var Valor1 = valores4[1].Valor;
+      var Resultado1 = valores4[1].Resultado;
+        
+      document.getElementById("Pol1").value = Politica1;
+      document.getElementById("Valor1").value = Valor1;
+      document.getElementById("Result1").value = Resultado1;
+        
+      var Politica2 = valores4[2].Politica;
+      var Valor2 = valores4[2].Valor;
+      var Resultado2 = valores4[2].Resultado;
+        
+      document.getElementById("Pol2").value = Politica2;
+      document.getElementById("Valor2").value = Valor2;
+      document.getElementById("Result2").value = Resultado2;
+        
+      var Politica3 = valores4[3].Politica;
+      var Valor3 = valores4[3].Valor;
+      var Resultado3 = valores4[3].Resultado;
+        
+      document.getElementById("Pol3").value = Politica3;
+      document.getElementById("Valor3").value = Valor3;
+      document.getElementById("Result3").value = Resultado3
+    }
+    function cargareventos5(valores5) {  console.log(valores5); 
+      var FechaCorte00 = valores5[0].FechaCorte;
+      var Instituacion00 = valores5[0].Institucion;
+      var TipoDeudor00 = valores5[0].TipoDeudor;
+      var TotalxVencer00 = valores5[0].PorVencer;
+      var TotalVencido00 = valores5[0].Vencido;
+      var NDevengaInt00 = valores5[0].NoDevengaInt;
+      var DemandaJud00 = valores5[0].DemandaJudicial;
+      var CarteraCastig00 = valores5[0].CarteraCastigada;
+      var DiasVencidos00 = valores5[0].DiasVencido;
+      
+      document.getElementById("FechaCorte00").value = FechaCorte00;
+      document.getElementById("Instituacion00").value = Instituacion00;
+      document.getElementById("TipoDeudor00").value = TipoDeudor00;
+      document.getElementById("TotalxVencer00").value = TotalxVencer00;
+      document.getElementById("TotalVencido00").value = TotalVencido00;
+      document.getElementById("NDevengaInt00").value = NDevengaInt00;
+      document.getElementById("DemandaJud00").value = DemandaJud00;
+      document.getElementById("CarteraCastig00").value = CarteraCastig00;
+      document.getElementById("DiasVencidos00").value = DiasVencidos00;
+      
+      // ----- //
+      
+      var FechaCorte01 = valores5[1].FechaCorte;
+      var Instituacion01 = valores5[1].Institucion;
+      var TipoDeudor01 = valores5[1].TipoDeudor;
+      var TotalxVencer01 = valores5[1].PorVencer;
+      var TotalVencido01 = valores5[1].Vencido;
+      var NDevengaInt01 = valores5[1].NoDevengaInt;
+      var DemandaJud01 = valores5[1].DemandaJudicial;
+      var CarteraCastig01 = valores5[1].CarteraCastigada;
+      var DiasVencidos01 = valores5[1].DiasVencido;
+      
+      document.getElementById("FechaCorte01").value = FechaCorte01;
+      document.getElementById("Instituacion01").value = Instituacion01;
+      document.getElementById("TipoDeudor01").value = TipoDeudor01;
+      document.getElementById("TotalxVencer01").value = TotalxVencer01;
+      document.getElementById("TotalVencido01").value = TotalVencido01;
+      document.getElementById("NDevengaInt01").value = NDevengaInt01;
+      document.getElementById("DemandaJud01").value = DemandaJud01;
+      document.getElementById("CarteraCastig01").value = CarteraCastig01;
+      document.getElementById("DiasVencidos01").value = DiasVencidos01;
+      
+      // ----- //
+      
+      var FechaCorte02 = valores5[2].FechaCorte;
+      var Instituacion02 = valores5[2].Institucion;
+      var TipoDeudor02 = valores5[2].TipoDeudor;
+      var TotalxVencer02 = valores5[2].PorVencer;
+      var TotalVencido02 = valores5[2].Vencido;
+      var NDevengaInt02 = valores5[2].NoDevengaInt;
+      var DemandaJud02 = valores5[2].DemandaJudicial;
+      var CarteraCastig02 = valores5[2].CarteraCastigada;
+      var DiasVencidos02 = valores5[2].DiasVencido;
+      
+      document.getElementById("FechaCorte02").value = FechaCorte02;
+      document.getElementById("Instituacion02").value = Instituacion02;
+      document.getElementById("TipoDeudor02").value = TipoDeudor02;
+      document.getElementById("TotalxVencer02").value = TotalxVencer02;
+      document.getElementById("TotalVencido02").value = TotalVencido02;
+      document.getElementById("NDevengaInt02").value = NDevengaInt02;
+      document.getElementById("DemandaJud02").value = DemandaJud02;
+      document.getElementById("CarteraCastig02").value = CarteraCastig02;
+      document.getElementById("DiasVencidos02").value = DiasVencidos02; 
+    }
+    function cargareventos6(valores6) {  console.log(valores6); 
+      var FechaCor00 = valores6[0].FechaCorte;
+      var Insti00 = valores6[0].Institucion;
+      var TipoCre00 = valores6[0].TipoCredito;
+      var SaldoDeu00 = valores6[0].SaldoDeuda;
+      var DemanJud00 = valores6[0].DemandaJudicial;
+      var CarteraCast00 = valores6[0].CarteraCastigada;
+      var Titular00 = valores6[0].Titular;
+      var Garante00 = valores6[0].Garante;
+      var Coddeu00 = valores6[0].Codeudor;
+      var TarCre00 = valores6[0].TarjetaCredito;
+      var AcConc00 = valores6[0].AcuerdoConcordatorio; 
+      
+      document.getElementById("FechaCor00").value = FechaCor00;
+      document.getElementById("Insti00").value = Insti00;
+      document.getElementById("TipoCre00").value = TipoCre00;
+      document.getElementById("SaldoDeu00").value = SaldoDeu00;
+      document.getElementById("DemanJud00").value = DemanJud00;
+      document.getElementById("CarteraCast00").value = CarteraCast00;
+      document.getElementById("Titular00").value = Titular00;
+      document.getElementById("Garante00").value = Garante00;
+      document.getElementById("Coddeu00").value = Coddeu00;   
+      document.getElementById("TarCre00").value = TarCre00;   
+      document.getElementById("AcConc00").value = AcConc00;  
+      
+      // ----- //
+      
+      var FechaCor01 = valores6[1].FechaCorte;
+      var Insti01 = valores6[1].Institucion;
+      var TipoCre01 = valores6[1].TipoCredito;
+      var SaldoDeu01 = valores6[1].SaldoDeuda;
+      var DemanJud01 = valores6[1].DemandaJudicial;
+      var CarteraCast01 = valores6[1].CarteraCastigada;
+      var Titular01 = valores6[1].Titular;
+      var Garante01 = valores6[1].Garante;
+      var Coddeu01 = valores6[1].Codeudor;
+      var TarCre01 = valores6[1].TarjetaCredito;
+      var AcConc01 = valores6[1].AcuerdoConcordatorio; 
+      
+      document.getElementById("FechaCor01").value = FechaCor01;
+      document.getElementById("Insti01").value = Insti01;
+      document.getElementById("TipoCre01").value = TipoCre01;
+      document.getElementById("SaldoDeu01").value = SaldoDeu01;
+      document.getElementById("DemanJud01").value = DemanJud01;
+      document.getElementById("CarteraCast01").value = CarteraCast01;
+      document.getElementById("Titular01").value = Titular01;
+      document.getElementById("Garante01").value = Garante01;
+      document.getElementById("Coddeu01").value = Coddeu01;   
+      document.getElementById("TarCre01").value = TarCre01;   
+      document.getElementById("AcConc01").value = AcConc01;
+      
+      // ----- //
+      
+      var FechaCor02 = valores6[2].FechaCorte;
+      var Insti02 = valores6[2].Institucion;
+      var TipoCre02 = valores6[2].TipoCredito;
+      var SaldoDeu02 = valores6[2].SaldoDeuda;
+      var DemanJud02 = valores6[2].DemandaJudicial;
+      var CarteraCast02 = valores6[2].CarteraCastigada;
+      var Titular02 = valores6[2].Titular;
+      var Garante02 = valores6[2].Garante;
+      var Coddeu02 = valores6[2].Codeudor;
+      var TarCre02 = valores6[2].TarjetaCredito;
+      var AcConc02 = valores6[2].AcuerdoConcordatorio; 
+      
+      document.getElementById("FechaCor02").value = FechaCor02;
+      document.getElementById("Insti02").value = Insti02;
+      document.getElementById("TipoCre02").value = TipoCre02;
+      document.getElementById("SaldoDeu02").value = SaldoDeu02;
+      document.getElementById("DemanJud02").value = DemanJud02;
+      document.getElementById("CarteraCast02").value = CarteraCast02;
+      document.getElementById("Titular02").value = Titular02;
+      document.getElementById("Garante02").value = Garante02;
+      document.getElementById("Coddeu02").value = Coddeu02;   
+      document.getElementById("TarCre02").value = TarCre02;   
+      document.getElementById("AcConc02").value = AcConc02; 
+      
+      // ----- //
+      
+      var FechaCor03 = valores6[3].FechaCorte;
+      var Insti03 = valores6[3].Institucion;
+      var TipoCre03 = valores6[3].TipoCredito;
+      var SaldoDeu03 = valores6[3].SaldoDeuda;
+      var DemanJud03 = valores6[3].DemandaJudicial;
+      var CarteraCast03 = valores6[3].CarteraCastigada;
+      var Titular03 = valores6[3].Titular;
+      var Garante03 = valores6[3].Garante;
+      var Coddeu03 = valores6[3].Codeudor;
+      var TarCre03 = valores6[3].TarjetaCredito;
+      var AcConc03 = valores6[3].AcuerdoConcordatorio; 
+      
+      document.getElementById("FechaCor03").value = FechaCor03;
+      document.getElementById("Insti03").value = Insti03;
+      document.getElementById("TipoCre03").value = TipoCre03;
+      document.getElementById("SaldoDeu03").value = SaldoDeu03;
+      document.getElementById("DemanJud03").value = DemanJud03;
+      document.getElementById("CarteraCast03").value = CarteraCast03;
+      document.getElementById("Titular03").value = Titular03;
+      document.getElementById("Garante03").value = Garante03;
+      document.getElementById("Coddeu03").value = Coddeu03;   
+      document.getElementById("TarCre03").value = TarCre03;   
+      document.getElementById("AcConc03").value = AcConc03; 
+      
+      // ----- //
+      
+      var FechaCor04 = valores6[4].FechaCorte;
+      var Insti04 = valores6[4].Institucion;
+      var TipoCre04 = valores6[4].TipoCredito;
+      var SaldoDeu04 = valores6[4].SaldoDeuda;
+      var DemanJud04 = valores6[4].DemandaJudicial;
+      var CarteraCast04 = valores6[4].CarteraCastigada;
+      var Titular04 = valores6[4].Titular;
+      var Garante04 = valores6[4].Garante;
+      var Coddeu04 = valores6[4].Codeudor;
+      var TarCre04 = valores6[4].TarjetaCredito;
+      var AcConc04 = valores6[4].AcuerdoConcordatorio; 
+      
+      document.getElementById("FechaCor04").value = FechaCor04;
+      document.getElementById("Insti04").value = Insti04;
+      document.getElementById("TipoCre04").value = TipoCre04;
+      document.getElementById("SaldoDeu04").value = SaldoDeu04;
+      document.getElementById("DemanJud04").value = DemanJud04;
+      document.getElementById("CarteraCast04").value = CarteraCast04;
+      document.getElementById("Titular04").value = Titular04;
+      document.getElementById("Garante04").value = Garante04;
+      document.getElementById("Coddeu04").value = Coddeu04;   
+      document.getElementById("TarCre04").value = TarCre04;   
+      document.getElementById("AcConc04").value = AcConc04; 
+    }
+    function cargareventos7(valores7) {  console.log(valores7); 
+      var Acreedor0 = valores7[0].Titulo;
+      var PVencer0 = valores7[0].PorVencer;
+      var NDevegaInt0 = valores7[0].NoDevengaInt;
+      var Vencido0 = valores7[0].Vencido;
+      var SalDeud0 = valores7[0].Total;
+      var DemanJudi0 = valores7[0].DemandaJudicial;
+      var CarteraCasti0 = valores7[0].CarteraCastigada; 
+      
+      document.getElementById("Acreedor0").value = Acreedor0;
+      document.getElementById("PVencer0").value = PVencer0;
+      document.getElementById("NDevegaInt0").value = NDevegaInt0;
+      document.getElementById("Vencido0").value = Vencido0;
+      document.getElementById("SalDeud0").value = SalDeud0;
+      document.getElementById("DemanJudi0").value = DemanJudi0;
+      document.getElementById("CarteraCasti0").value = CarteraCasti0;
+      
+      // ----- //
+      
+      var Acreedor1 = valores7[1].Titulo;
+      var PVencer1 = valores7[1].PorVencer;
+      var NDevegaInt1 = valores7[1].NoDevengaInt;
+      var Vencido1 = valores7[1].Vencido;
+      var SalDeud1 = valores7[1].Total;
+      var DemanJudi1 = valores7[1].DemandaJudicial;
+      var CarteraCasti1 = valores7[1].CarteraCastigada; 
+      
+      document.getElementById("Acreedor1").value = Acreedor1;
+      document.getElementById("PVencer1").value = PVencer1;
+      document.getElementById("NDevegaInt1").value = NDevegaInt1;
+      document.getElementById("Vencido1").value = Vencido1;
+      document.getElementById("SalDeud1").value = SalDeud1;
+      document.getElementById("DemanJudi1").value = DemanJudi1;
+      document.getElementById("CarteraCasti1").value = CarteraCasti1;
+      
+      // ----- //
+      
+      //var Acreedor2 = valores7[2].Titulo;
+      var PVencer2 = valores7[2].PorVencer;
+      var NDevegaInt2 = valores7[2].NoDevengaInt;
+      var Vencido2 = valores7[2].Vencido;
+      var SalDeud2 = valores7[2].Total;
+      var DemanJudi2 = valores7[2].DemandaJudicial;
+      var CarteraCasti2 = valores7[2].CarteraCastigada; 
+      
+      //document.getElementById("Acreedor2").value = Acreedor2;
+      document.getElementById("PVencer2").value = PVencer2;
+      document.getElementById("NDevegaInt2").value = NDevegaInt2;
+      document.getElementById("Vencido2").value = Vencido2;
+      document.getElementById("SalDeud2").value = SalDeud2;
+      document.getElementById("DemanJudi2").value = DemanJudi2;
+      document.getElementById("CarteraCasti2").value = CarteraCasti2;
+    }
+    function toastLaunch(){
+      //var element = document.getElementById("resultadoEquifax2");
+      //element.classList.toggle("slds-hide"); 
+      //element.classList.remove('slds-hide')
+      document.getElementById('resultadoEquifax').style.display = 'none';
+      return false;
+    }   
+    function ImprimirResultado() {
+      var Documento = $("[id$='numeroDocumento']").val();
+      var Proyecto = document.getElementById("Proyecto").value;
+      var valorBien = $("[id$='ValBien']").val(); var valorBienF = (parseFloat(valorBien)).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+      var Porcentaje = $("[id$='ValEntrada']").val();
+      var valorEntrada = valorBien * (Porcentaje/100); var valorEntradaF = (parseFloat(valorEntrada)).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+      var ingresoUF = $("[id$='ingresoUnidadFamiliar']").val(); var ingresoUFF = (parseFloat(ingresoUF)).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+      var gastoUF = $("[id$='gastoHogarUnidadFamiliar']").val(); var gastoUFF = (parseFloat(gastoUF)).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+      var plazo = $("[id$='Plazo']").val();
+      var score = Valor;
+      var Segmentacion = document.getElementById("Segmentacion").value; 
+      var NivelInP = document.getElementById("NivelInP").value;
+      var ValorEntA = document.getElementById("ValorEntA").value;
+      var PlazoRes = document.getElementById("PlazoRes").value;
+      var CoutaMen = document.getElementById("CoutaMen").value;
+      var CapPago = document.getElementById("CapPago").value;
+      var SugVEM = document.getElementById("SugVEM").value;
+      var SugP1 = document.getElementById("SugP1").value;
+      var SugC1 = document.getElementById("SugC1").value;
+      var SugPM = document.getElementById("SugPM").value;
+      var SugP2 = document.getElementById("SugP2").value;
+      var SugC2 = document.getElementById("SugC2").value;     
+      var P0 = document.getElementById("P0").value;
+      var C0 = document.getElementById("C0").value;
+      var P1 = document.getElementById("P1").value;
+      var C1 = document.getElementById("C1").value;
+      var P2 = document.getElementById("P2").value;
+      var C2 = document.getElementById("C2").value;
+      var P3 = document.getElementById("P3").value;
+      var C3 = document.getElementById("C3").value;
+      var P4 = document.getElementById("P4").value;
+      var C4 = document.getElementById("C4").value;
+      var Pol0 = document.getElementById("Pol0").value;
+      var Valor0 = document.getElementById("Valor0").value;
+      var Result0 = document.getElementById("Result0").value;
+      var Pol1 = document.getElementById("Pol1").value;
+      var Valor1 = document.getElementById("Valor1").value;
+      var Result1 = document.getElementById("Result1").value;
+      var Pol2 = document.getElementById("Pol2").value;
+      var Valor2 = document.getElementById("Valor2").value;
+      var Result2 = document.getElementById("Result2").value;
+      var Pol3 = document.getElementById("Pol3").value;
+      var Valor3 = document.getElementById("Valor3").value;
+      var Result3 = document.getElementById("Result3").value;     
+      var FechaCorte00 = document.getElementById("FechaCorte00").value;
+      var Instituacion00 = document.getElementById("Instituacion00").value;
+      var TipoDeudor00 = document.getElementById("TipoDeudor00").value;
+      var TotalxVencer00 = document.getElementById("TotalxVencer00").value;
+      var TotalVencido00 = document.getElementById("TotalVencido00").value;
+      var NDevengaInt00 = document.getElementById("NDevengaInt00").value;
+      var DemandaJud00 = document.getElementById("DemandaJud00").value;
+      var CarteraCastig00 = document.getElementById("CarteraCastig00").value;
+      var DiasVencidos00 = document.getElementById("DiasVencidos00").value;      
+      var FechaCorte01 = document.getElementById("FechaCorte01").value;
+      var Instituacion01 = document.getElementById("Instituacion01").value;
+      var TipoDeudor01 = document.getElementById("TipoDeudor01").value;
+      var TotalxVencer01 = document.getElementById("TotalxVencer01").value;
+      var TotalVencido01 = document.getElementById("TotalVencido01").value;
+      var NDevengaInt01 = document.getElementById("NDevengaInt01").value;
+      var DemandaJud01 = document.getElementById("DemandaJud01").value;
+      var CarteraCastig01 = document.getElementById("CarteraCastig01").value;
+      var DiasVencidos01 = document.getElementById("DiasVencidos01").value;      
+      var FechaCorte02 = document.getElementById("FechaCorte02").value;
+      var Instituacion02 = document.getElementById("Instituacion02").value;
+      var TipoDeudor02 = document.getElementById("TipoDeudor02").value;
+      var TotalxVencer02 = document.getElementById("TotalxVencer02").value;
+      var TotalVencido02 = document.getElementById("TotalVencido02").value;
+      var NDevengaInt02 = document.getElementById("NDevengaInt02").value;
+      var DemandaJud02 = document.getElementById("DemandaJud02").value;
+      var CarteraCastig02 = document.getElementById("CarteraCastig02").value;
+      var DiasVencidos02 = document.getElementById("DiasVencidos02").value;     
+      var FechaCor00 = document.getElementById("FechaCor00").value;
+      var Insti00 = document.getElementById("Insti00").value;
+      var TipoCre00 = document.getElementById("TipoCre00").value;
+      var SaldoDeu00 = document.getElementById("SaldoDeu00").value;
+      var DemanJud00 = document.getElementById("DemanJud00").value;
+      var CarteraCast00 = document.getElementById("CarteraCast00").value;
+      var Titular00 = document.getElementById("Titular00").value;
+      var Garante00 = document.getElementById("Garante00").value;
+      var Coddeu00 = document.getElementById("Coddeu00").value;
+      var TarCre00 = document.getElementById("TarCre00").value;
+      var AcConc00 = document.getElementById("AcConc00").value;
+      var FechaCor01 = document.getElementById("FechaCor01").value;
+      var Insti01 = document.getElementById("Insti01").value;
+      var TipoCre01= document.getElementById("TipoCre01").value;
+      var SaldoDeu01 = document.getElementById("SaldoDeu01").value;
+      var DemanJud01 = document.getElementById("DemanJud01").value;
+      var CarteraCast01 = document.getElementById("CarteraCast01").value;
+      var Titular01 = document.getElementById("Titular01").value;
+      var Garante01 = document.getElementById("Garante01").value;
+      var Coddeu01 = document.getElementById("Coddeu01").value;
+      var TarCre01 = document.getElementById("TarCre01").value;
+      var AcConc01 = document.getElementById("AcConc01").value;
+      var FechaCor02 = document.getElementById("FechaCor02").value;
+      var Insti02 = document.getElementById("Insti02").value;
+      var TipoCre02= document.getElementById("TipoCre02").value;
+      var SaldoDeu02 = document.getElementById("SaldoDeu02").value;
+      var DemanJud02 = document.getElementById("DemanJud02").value;
+      var CarteraCast02 = document.getElementById("CarteraCast02").value;
+      var Titular02 = document.getElementById("Titular02").value;
+      var Garante02 = document.getElementById("Garante02").value;
+      var Coddeu02 = document.getElementById("Coddeu02").value;
+      var TarCre02 = document.getElementById("TarCre02").value;
+      var AcConc02 = document.getElementById("AcConc02").value;
+      var FechaCor03 = document.getElementById("FechaCor03").value;
+      var Insti03 = document.getElementById("Insti03").value;
+      var TipoCre03= document.getElementById("TipoCre03").value;
+      var SaldoDeu03 = document.getElementById("SaldoDeu03").value;
+      var DemanJud03 = document.getElementById("DemanJud03").value;
+      var CarteraCast03 = document.getElementById("CarteraCast03").value;
+      var Titular03 = document.getElementById("Titular03").value;
+      var Garante03 = document.getElementById("Garante03").value;
+      var Coddeu03 = document.getElementById("Coddeu03").value;
+      var TarCre03 = document.getElementById("TarCre03").value;
+      var AcConc03 = document.getElementById("AcConc03").value;
+      var FechaCor04 = document.getElementById("FechaCor04").value;
+      var Insti04 = document.getElementById("Insti04").value;
+      var TipoCre04= document.getElementById("TipoCre04").value;
+      var SaldoDeu04 = document.getElementById("SaldoDeu04").value;
+      var DemanJud04 = document.getElementById("DemanJud04").value;
+      var CarteraCast04 = document.getElementById("CarteraCast04").value;
+      var Titular04 = document.getElementById("Titular04").value;
+      var Garante04 = document.getElementById("Garante04").value;
+      var Coddeu04 = document.getElementById("Coddeu04").value;
+      var TarCre04 = document.getElementById("TarCre04").value;
+      var AcConc04 = document.getElementById("AcConc04").value;     
+      var Acreedor0 = document.getElementById("Acreedor0").value;
+      var PVencer0 = document.getElementById("PVencer0").value;
+      var NDevegaInt0 = document.getElementById("NDevegaInt0").value;
+      var Vencido0 = document.getElementById("Vencido0").value;
+      var SalDeud0 = document.getElementById("SalDeud0").value;
+      var DemanJudi0 = document.getElementById("DemanJudi0").value;
+      var CarteraCasti0 = document.getElementById("CarteraCasti0").value;
+      var Acreedor1 = document.getElementById("Acreedor1").value;
+      var PVencer1 = document.getElementById("PVencer1").value;
+      var NDevegaInt1 = document.getElementById("NDevegaInt1").value;
+      var Vencido1 = document.getElementById("Vencido1").value;
+      var SalDeud1 = document.getElementById("SalDeud1").value;
+      var DemanJudi1 = document.getElementById("DemanJudi1").value;
+      var CarteraCasti1 = document.getElementById("CarteraCasti1").value;
+      var PVencer2 = document.getElementById("PVencer2").value;
+      var NDevegaInt2 = document.getElementById("NDevegaInt2").value;
+      var Vencido2 = document.getElementById("Vencido2").value;
+      var SalDeud2 = document.getElementById("SalDeud2").value;
+      var DemanJudi2 = document.getElementById("DemanJudi2").value;
+      var CarteraCasti2 = document.getElementById("CarteraCasti2").value;
+      
+      window.open('/apex/CI_Equifax_Reporte?id=' + '{!Opportunity.Id}&Documento='+Documento+'&Proyecto='+Proyecto+'&valorBien='+valorBienF+'&valorEntrada='+valorEntradaF+'&ingresoUF='+ingresoUFF+'&gastoUF='+gastoUFF+'&plazo='+plazo+'&score='+score+'&Segmentacion='+Segmentacion+'&NivelInP='+NivelInP+'&ValorEntA='+ValorEntA+'&PlazoRes='+PlazoRes+'&CoutaMen='+CoutaMen+'&CapPago='+CapPago+'&SugVEM='+SugVEM+'&SugP1='+SugP1+'&SugC1='+SugC1+'&SugPM='+SugPM+'&SugP2='+SugP2+'&SugC2='+SugC2+'&P0='+P0+'&C0='+C0+'&P1='+P1+'&C1='+C1+'&P2='+P2+'&C2='+C2+'&P3='+P3+'&C3='+C3+'&P4='+P4+'&C4='+C4+'&Pol0='+Pol0+'&Valor0='+Valor0+'&Result0='+Result0+'&Pol1='+Pol1+'&Valor1='+Valor1+'&Result1='+Result1+'&Pol2='+Pol2+'&Valor2='+Valor2+'&Result2='+Result2+'&Pol3='+Pol3+'&Valor3='+Valor3+'&Result3='+Result3+'&FechaCorte00='+FechaCorte00+'&Instituacion00='+Instituacion00+'&TipoDeudor00='+TipoDeudor00+'&TotalxVencer00='+TotalxVencer00+'&TotalVencido00='+TotalVencido00+'&NDevengaInt00='+NDevengaInt00+'&DemandaJud00='+DemandaJud00+'&CarteraCastig00='+CarteraCastig00+'&DiasVencidos00='+DiasVencidos00+'&FechaCorte01='+FechaCorte01+'&Instituacion01='+Instituacion01+'&TipoDeudor01='+TipoDeudor01+'&TotalxVencer01='+TotalxVencer01+'&TotalVencido001='+TotalVencido01+'&NDevengaInt01='+NDevengaInt01+'&DemandaJud01='+DemandaJud01+'&CarteraCastig01='+CarteraCastig01+'&DiasVencidos01='+DiasVencidos01+'&FechaCorte02='+FechaCorte02+'&Instituacion02='+Instituacion02+'&TipoDeudor02='+TipoDeudor02+'&TotalxVencer02='+TotalxVencer02+'&TotalVencido02='+TotalVencido02+'&NDevengaInt02='+NDevengaInt02+'&DemandaJud02='+DemandaJud02+'&CarteraCastig02='+CarteraCastig02+'&DiasVencidos02='+DiasVencidos02+'&FechaCor00='+FechaCor00+'&Insti00='+Insti00+'&TipoCre00='+TipoCre00+'&SaldoDeu00='+SaldoDeu00+'&DemanJud00='+DemanJud00+'&CarteraCast00='+CarteraCast00+'&Titular00='+Titular00+'&Garante00='+Garante00+'&Coddeu00='+Coddeu00+'&TarCre00='+TarCre00+'&AcConc00='+AcConc00+'&FechaCor00='+FechaCor00+'&Insti00='+Insti00+'&TipoCre00='+TipoCre00+'&SaldoDeu00='+SaldoDeu00+'&DemanJud00='+DemanJud00+'&CarteraCast00='+CarteraCast00+'&Titular00='+Titular00+'&Garante00='+Garante00+'&Coddeu00='+Coddeu00+'&TarCre00='+TarCre00+'&AcConc00='+AcConc00+'&FechaCor01='+FechaCor01+'&Insti01='+Insti01+'&TipoCre01='+TipoCre01+'&SaldoDeu01='+SaldoDeu01+'&DemanJud01='+DemanJud01+'&CarteraCast01='+CarteraCast01+'&Titular01='+Titular01+'&Garante01='+Garante01+'&Coddeu01='+Coddeu01+'&TarCre01='+TarCre01+'&AcConc01='+AcConc01+'&FechaCor02='+FechaCor02+'&Insti02='+Insti02+'&TipoCre02='+TipoCre02+'&SaldoDeu02='+SaldoDeu02+'&DemanJud02='+DemanJud02+'&CarteraCast02='+CarteraCast02+'&Titular02='+Titular02+'&Garante02='+Garante02+'&Coddeu02='+Coddeu02+'&TarCre02='+TarCre02+'&AcConc02='+AcConc02+'&FechaCor03='+FechaCor03+'&Insti03='+Insti03+'&TipoCre03='+TipoCre03+'&SaldoDeu03='+SaldoDeu03+'&DemanJud03='+DemanJud03+'&CarteraCast03='+CarteraCast03+'&Titular03='+Titular03+'&Garante03='+Garante03+'&Coddeu03='+Coddeu03+'&TarCre03='+TarCre03+'&AcConc03='+AcConc03+'&FechaCor04='+FechaCor04+'&Insti04='+Insti04+'&TipoCre04='+TipoCre04+'&SaldoDeu04='+SaldoDeu04+'&DemanJud04='+DemanJud04+'&CarteraCast04='+CarteraCast04+'&Titular04='+Titular04+'&Garante04='+Garante04+'&Coddeu04='+Coddeu04+'&TarCre04='+TarCre04+'&AcConc04='+AcConc04+'&Acreedor0='+Acreedor0+'&PVencer0='+PVencer0+'&NDevegaInt0='+NDevegaInt0+'&Vencido0='+Vencido0+'&SalDeud0='+SalDeud0+'&DemanJudi0='+DemanJudi0+'&CarteraCasti0='+CarteraCasti0+'&Acreedor1='+Acreedor1+'&PVencer1='+PVencer1+'&NDevegaInt1='+NDevegaInt1+'&Vencido1='+Vencido1+'&SalDeud1='+SalDeud1+'&DemanJudi1='+DemanJudi1+'&CarteraCasti1='+CarteraCasti1+'&PVencer2='+PVencer2+'&NDevegaInt2='+NDevegaInt2+'&Vencido2='+Vencido2+'&SalDeud2='+SalDeud2+'&DemanJudi2='+DemanJudi2+'&CarteraCasti2='+CarteraCasti2+'', '_blank', 'toolbar=yes,scrollbars=yes,resizable=yes,top=50,left=150,width=1200,height=650');
+    }
+    function formatMoney(number, decPlaces, decSep, thouSep) {
+      decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
+      decSep = typeof decSep === "undefined" ? "." : decSep;
+      thouSep = typeof thouSep === "undefined" ? "," : thouSep;
+      var sign = number < 0 ? "-" : "";
+      var i = String(parseInt(number = Math.abs(Number(number) || 0).toFixed(decPlaces)));
+      var j = (j = i.length) > 3 ? j % 3 : 0;
+      
+      return sign + (j ? i.substr(0, j) + thouSep : "") + i.substr(j).replace(/(\decSep{3})(?=\decSep)/g, "$1" + thouSep) + (decPlaces ? decSep + Math.abs(number - i).toFixed(decPlaces).slice(2) : "");
+    }
+    </script>
+  
+  </head>
+  
+  <body>
+  
+  <apex:form >
+    <apex:actionFunction name="cargarEquifax" status="loadingE" action="{!consultarEquifax}" oncomplete="cargareventos({!valores});">               
+        <apex:param name="tipoDocumento" value="C"/>
+        <apex:param name="numeroDocumento" value="{!Opportunity.Account.CI_Identificacion__c}"/>
+    </apex:actionFunction>
+    <apex:actionFunction name="cargarEquifax2" status="loadingE" action="{!consultarEquifax}" oncomplete="cargareventos2({!valores2});">               
+        <apex:param name="tipoDocumento" value="C"/>
+        <apex:param name="numeroDocumento" value="{!Opportunity.Account.CI_Identificacion__c}"/>
+    </apex:actionFunction>
+    <apex:actionFunction name="cargarEquifax3" status="loadingE" action="{!consultarEquifax}" oncomplete="cargareventos3({!valores3});">               
+        <apex:param name="tipoDocumento" value="C"/>
+        <apex:param name="numeroDocumento" value="{!Opportunity.Account.CI_Identificacion__c}"/>
+    </apex:actionFunction>
+    <apex:actionFunction name="cargarEquifax4" status="loadingE" action="{!consultarEquifax}" oncomplete="cargareventos4({!valores4});">               
+        <apex:param name="tipoDocumento" value="C"/>
+        <apex:param name="numeroDocumento" value="{!Opportunity.Account.CI_Identificacion__c}"/>
+    </apex:actionFunction>
+    <apex:actionFunction name="cargarEquifax5" status="loadingE" action="{!consultarEquifax}" oncomplete="cargareventos5({!valores5});">               
+        <apex:param name="tipoDocumento" value="C"/>
+        <apex:param name="numeroDocumento" value="{!Opportunity.Account.CI_Identificacion__c}"/>
+    </apex:actionFunction>
+    <apex:actionFunction name="cargarEquifax6" status="loadingE" action="{!consultarEquifax}" oncomplete="cargareventos6({!valores6});">               
+        <apex:param name="tipoDocumento" value="C"/>
+        <apex:param name="numeroDocumento" value="{!Opportunity.Account.CI_Identificacion__c}"/>
+    </apex:actionFunction>
+    <apex:actionFunction name="cargarEquifax7" status="loadingE" action="{!consultarEquifax}" oncomplete="cargareventos7({!valores7});">               
+        <apex:param name="tipoDocumento" value="C"/>
+        <apex:param name="numeroDocumento" value="{!Opportunity.Account.CI_Identificacion__c}"/>
+    </apex:actionFunction>
+    <apex:actionFunction name="cargarEquifaxAll" status="loadingE" action="{!consultarEquifax}" oncomplete="cargareventosAll({!valores},{!valores2},{!valores3},{!valores4},{!valores5},{!valores6},{!valores7});">               
+        <apex:param name="tipoDocumento" value="C"/>
+        <apex:param name="numeroDocumento" value="{!Opportunity.Account.CI_Identificacion__c}"/>
+    </apex:actionFunction>
+  </apex:form>
+  
+  <center>
+    <apex:actionStatus id="loadingE">
+      <apex:facet name="start">
+        <div class="demo-only" style="height: 0rem;">
+          <div role="status" class="slds-spinner slds-spinner_medium">
+            <span class="slds-assistive-text">Loading</span>
+            <div class="slds-spinner__dot-a"></div>
+            <div class="slds-spinner__dot-b"></div>
+          </div>
+        </div>
+      </apex:facet>
+      <apex:facet name="stop"></apex:facet>                
+    </apex:actionStatus>
+  </center>
+  
+  <apex:form >
+  
+    <div class="slds-card-wrapper" id="allpage"> 
+      <article class="slds-card slds-card_boundary">
+        <div class="slds-card__header slds-grid">
+          <header class="slds-media slds-media_center slds-has-flexi-truncate">
+            <div class="slds-media__figure">
+              <span class="slds-icon_container slds-icon-standard-contact" title="SCORE EQUIFAX">
+                <svg class="slds-icon" aria-hidden="true">
+                  <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/action-sprite/svg/symbols.svg#add_contact')}"></use>
+                </svg>
+                <span class="slds-assistive-text">SCORE EQUIFAX</span>
+              </span>
+            </div>
+            <div class="slds-media__body">
+              <h2 class="slds-card__header-title">
+                <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="SCORE EQUIFAX">
+                  <span>SCORE EQUIFAX</span>
+                </a>
+              </h2>
+            </div>
+            <div class="slds-no-flex">
+              <apex:commandButton styleclass="slds-button slds-button_brand" id="consultarEqx" value="CONSULTAR EQUIFAX" reRender="allpage" action="{!consultarEquifax}" onclick="cleanAll();" oncomplete="cargarEquifax();cargarEquifax2();cargarEquifax3();cargarEquifax4();cargarEquifax5();cargarEquifax6();cargarEquifax7();cargarEquifaxAll();"/>
+              <button id="print" type="button" class="slds-button slds-button_brand" disabled="true" onclick="ImprimirResultado();">IMPRIMIR &nbsp;&nbsp;
+                <span class="slds-icon_container" title="IMPRIMIR">
+                  <svg class="slds-icon" aria-hidden="true">
+                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#print')}"></use>
+                  </svg>
+                </span>
+              </button>    
+            </div>
+          </header>
+        </div>
+        <div class="slds-card__body slds-card__body_inner" align="left">
+          <p><span style="font-weight:bold;">MODELO EXPERTO CORPORACION INMOBILIARE</span></p>                         
+        </div>
+      </article> 
+    </div>
+    
+    <article class="slds-card">
+      <div class="slds-card__body">
+        <table class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered slds-table_fixed-layout" role="grid">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th class="" scope="col">
+                <div class="slds-truncate" title="DATOS SOLICITUD">DATOS SOLICITUD</div>
+              </th>
+              <th class="" scope="col">
+                <div class="slds-truncate" title=""></div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="TIPO DOCUMENTO">
+                  <a href="javascript:void(0);" tabindex="-1">TIPO DOCUMENTO</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="TIPO DOCUMENTO"><apex:inputHidden value="{!tipoProyecto}" id="tipoProyecto"/><input id="TipoIdenti" class="slds-input" style="width:50%;" disabled="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="NÚMERO DE DOCUMENTO">
+                  <a href="javascript:void(0);" tabindex="-1"><abbr class="slds-required" title="required">* </abbr>NÚMERO DE DOCUMENTO</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="NÚMERO DE DOCUMENTO"><apex:inputText styleClass="slds-input" style="width:50%;" value="{!numeroDocumento}" id="numeroDocumento" required="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="VALOR DEL BIEN">
+                  <a href="javascript:void(0);" tabindex="-1"><abbr class="slds-required" title="required">* </abbr>VALOR DEL BIEN</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="VALOR DEL BIEN"><apex:inputText styleClass="slds-input" style="width:50%;" value="{!valorBien}" id="ValBien" required="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="PORCENTAJE DE ENTRADA">
+                  <a href="javascript:void(0);" tabindex="-1"><abbr class="slds-required" title="required">* </abbr>PORCENTAJE DE ENTRADA</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="VALOR DE ENTRADA"><apex:inputText styleClass="slds-input" style="width:50%;" value="{!valorEntrada}" id="ValEntrada" required="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="PLAZO SOLICITADO">
+                  <a href="javascript:void(0);" tabindex="-1"><abbr class="slds-required" title="required">* </abbr>PLAZO SOLICITADO</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="PLAZO SOLICITADO"><apex:inputText styleClass="slds-input" style="width:50%;" value="{!plazo}" id="Plazo" required="true"/></div>
+              </td>
+            </tr> 
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="INGRESOS DE UNIDAD FAMILIAR">
+                  <a href="javascript:void(0);" tabindex="-1">INGRESOS DE UNIDAD FAMILIAR</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="INGRESOS DE UNIDAD FAMILIAR"><apex:inputText styleClass="slds-input" style="width:50%;" value="{!ingresoUnidadFamiliar}" id="ingresoUnidadFamiliar"/></div>
+              </td>
+            </tr>         
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="GASTO HOGAR DE UNIDAD FAMILIAR">
+                  <a href="javascript:void(0);" tabindex="-1">GASTO HOGAR DE UNIDAD FAMILIAR</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="GASTO HOGAR DE UNIDAD FAMILIAR"><apex:inputText styleClass="slds-input" style="width:50%;" value="{!gastoHogarUnidadFamiliar}" id="gastoHogarUnidadFamiliar"/></div>
+              </td>
+            </tr>          
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="TIPO DE CRÉDITO">
+                  <a href="javascript:void(0);" tabindex="-1">TIPO DE CRÉDITO</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="TIPO DE CRÉDITO"><input id="TipoCre" class="slds-input" style="width:50%;" value="VIVIENDA" disabled="true"/></div>
+              </td>
+            </tr>  
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="TIPO DE PROYECTO">
+                  <a href="javascript:void(0);" tabindex="-1">TIPO DE PROYECTO</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="TIPO DE PROYECTO"><input id="Proyecto" class="slds-input" style="width:50%;" disabled="true"/></div>
+              </td>
+            </tr>         
+          </tbody>
+        </table>
+        <p>&nbsp;</p>     
+        <div id="resultadoEquifax" class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" style="display:none;" role="alert">
+          <span class="slds-assistive-text">error</span>
+          <span class="slds-icon_container slds-icon-text-error slds-m-right_x-small" title="Description of icon when needed">
+            <svg class="slds-icon" aria-hidden="true">
+              <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/action-sprite/svg/symbols.svg#announcement')}"></use>
+            </svg>
+          </span>
+          <h2>No hay datos devueltos por Equifax.</h2>
+          <div class="slds-notify__close">
+            <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Cerrar" onclick="toastLaunch()">
+              <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#close')}" />
+              </svg>
+              <span class="slds-assistive-text">Close</span>
+            </button>
+          </div>
+        </div> 
+        <p style="font-weight:bold;">RESULTADO</p>  
+        <table id="resultado" class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered slds-table_fixed-layout" role="grid">
+          <tbody>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="SEGMENTACIÓN">
+                  <a href="javascript:void(0);" tabindex="-1">SEGMENTACIÓN</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="SEGMENTACIÓN"><input id="Segmentacion" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="NIVEL DE INGRESO (PREDICTOR)">
+                  <a href="javascript:void(0);" tabindex="-1">NIVEL DE INGRESO (PREDICTOR)</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="NIVEL DE INGRESO (PREDICTOR)"><input id="NivelInP" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="VALOR DE ENTRADA APROBADO">
+                  <a href="javascript:void(0);" tabindex="-1">VALOR DE ENTRADA APROBADO</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="VALOR DE ENTRADA APROBADO"><input id="ValorEntA" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="PLAZO">
+                  <a href="javascript:void(0);" tabindex="-1">PLAZO</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="PLAZO"><input id="PlazoRes" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="CUOTA MENSUAL">
+                  <a href="javascript:void(0);" tabindex="-1">CUOTA MENSUAL</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="CUOTA MENSUAL"><input id="CoutaMen" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="CAPACIDAD DE PAGO">
+                  <a href="javascript:void(0);" tabindex="-1">CAPACIDAD DE PAGO</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="CAPACIDAD DE PAGO"><input id="CapPago" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p style="font-weight:bold;">RESULTADO</p>
+        <table id="resultado2" class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered slds-table_fixed-layout" role="grid">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th class="" scope="col">
+                <div class="slds-truncate" title="Detalle">Detalle</div>
+              </th>
+              <th class="" scope="col">
+                <div class="slds-truncate" title="V. Entrada(Usd)">V. Entrada(Usd)</div>
+              </th>
+              <th class="" scope="col">
+                <div class="slds-truncate" title="Plazo">Plazo</div>
+              </th>
+              <th class="" scope="col">
+                <div class="slds-truncate" title="Cuota(Usd)">Cuota(Usd)</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="Sugerencia V. Entrada Máximo">
+                  <a href="javascript:void(0);" tabindex="-1">Sugerencia V. Entrada Máximo</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="Sugerencia V. Entrada Máximo"><input id="SugVEM" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+              <td role="gridcell">
+                <div class="slds-truncate" title="Sugerencia V. Entrada Máximo"><input id="SugP1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+              <td role="gridcell">
+                <div class="slds-truncate" title="Sugerencia V. Entrada Máximo"><input id="SugC1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title="Sugerencia Plazo Mínimo">
+                  <a href="javascript:void(0);" tabindex="-1">Sugerencia Plazo Mínimo</a>
+                </div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title="Sugerencia V. Entrada Máximo"><input id="SugPM" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+              <td role="gridcell">
+                <div class="slds-truncate" title="Sugerencia V. Entrada Máximo"><input id="SugP2" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+              <td role="gridcell">
+                <div class="slds-truncate" title="Sugerencia V. Entrada Máximo"><input id="SugC2" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p style="font-weight:bold;">RESULTADO SIMULACIONES</p>
+        <table id="resultado3" class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered slds-table_fixed-layout" role="grid">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th class="" scope="col">
+                <div class="slds-truncate" title="Plazo">Plazo</div>
+              </th>
+              <th class="" scope="col">
+                <div class="slds-truncate" title="Cuota">Cuota</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title=""><input id="P0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="C0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>     
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title=""><input id="P1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="C1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title=""><input id="P2" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="C2" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title=""><input id="P3" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="C3" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title=""><input id="P4" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="C4" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p style="font-weight:bold;">RESULTADO POLÍTICAS</p>
+        <table id="resultado4" class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered slds-table_fixed-layout" role="grid">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th class="" scope="col">
+                <div class="slds-truncate" title="Política">Política</div>
+              </th>
+              <th class="" scope="col">
+                <div class="slds-truncate" title="Valor">Valor</div>
+              </th>
+              <th class="" scope="col">
+                <div class="slds-truncate" title="Resultado">Resultado</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title=""><input id="Pol0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="Valor0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="Result0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr>     
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title=""><input id="Pol1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="Valor1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="Result1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr> 
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title=""><input id="Pol2" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="Valor2" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="Result2" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr> 
+            <tr class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title=""><input id="Pol3" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </th>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="Valor3" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+              <td role="gridcell">
+                <div class="slds-truncate" title=""><input id="Result3" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+              </td>
+            </tr> 
+          </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p style="font-weight:bold;">INFORMACIÓN HISTÓRICA INFOCOM EN LOS ÚLTIMOS 36 MESES</p>
+        <div class="slds-card__body slds-scrollable">
+          <table id="resultado5" class="slds-table slds-table_bordered slds-table_cell-buffer">
+            <thead>
+              <tr class="slds-text-title_caps">             
+                <th scope="col">
+                  <div class="slds-truncate" title="Fecha Corte">Fecha Corte</div>
+                </th>
+                <th scope="col">
+                  <div class="" title="Institución">Institución</div>
+                </th>
+                <th scope="col">
+                  <div class="slds-truncate" title="Tipo Deudor">Tipo Deudor</div>
+                </th>
+                <th scope="col">
+                  <div class="slds-truncate" title="Total por Vencer">Total por Vencer</div>
+                </th>
+                <th scope="col">
+                  <div class="slds-truncate" title="Total Vencido">Total Vencido</div>
+                </th>
+                <th scope="col">
+                  <div class="slds-truncate" title="No Devenga Interés">No Devenga Interés</div>
+                </th>
+                <th scope="col">
+                  <div class="slds-truncate" title="Demanda Judicial">Demanda Judicial</div>
+                </th>
+                <th scope="col">
+                  <div class="slds-truncate" title="Cartera Castigada">Cartera Castigada</div>
+                </th>
+                <th scope="col">
+                  <div class="slds-truncate" title="Días Vencidos">Días Vencidos</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="FechaCorte00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Instituacion00" class="slds-input" style="width:350px; border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TipoDeudor00" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TotalxVencer00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TotalVencido00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="NDevengaInt00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemandaJud00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCastig00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DiasVencidos00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr> 
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="FechaCorte01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Instituacion01" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TipoDeudor01" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TotalxVencer01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TotalVencido01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="NDevengaInt01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemandaJud01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCastig01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DiasVencidos01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr>     
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="FechaCorte02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Instituacion02" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TipoDeudor02" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TotalxVencer02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TotalVencido02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="NDevengaInt02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemandaJud02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCastig02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DiasVencidos02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr> 
+            </tbody>
+          </table>        
+        </div> 
+        <p>&nbsp;</p>
+        <p style="font-weight:bold;">DETALLE DISTRIBUCIÓN DE ENDUEDAMIENTO</p>
+        <div class="slds-card__body slds-scrollable">
+          <table id="resultado6" class="slds-table slds-table_bordered slds-table_cell-buffer">
+            <thead>
+              <tr class="slds-line-height_reset">
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Fecha Corte">Fecha Corte</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="" title="Institución">Institución</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Tipo Crédito">Tipo Crédito</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Saldo Deuda">Saldo Deuda</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Demanda Judicial">Demanda Judicial</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Cartera Castigada">Cartera Castigada</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Titular">Titular</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Garante">Garante</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Codeudor">Codeudor</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Tarjeta Crédito">Tarjeta Crédito</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Ac. Conc.">Ac. Conc.</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="FechaCor00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Insti00" class="slds-input" style="width:350px; border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TipoCre00" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="SaldoDeu00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemanJud00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCast00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>  
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Titular00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Garante00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Coddeu00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TarCre00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="AcConc00" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr> 
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="FechaCor01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Insti01" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TipoCre01" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="SaldoDeu01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemanJud01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCast01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Titular01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Garante01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Coddeu01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TarCre01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="AcConc01" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr> 
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="FechaCor02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Insti02" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TipoCre02" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="SaldoDeu02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemanJud02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCast02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Titular02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Garante02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Coddeu02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TarCre02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="AcConc02" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr>
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="FechaCor03" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Insti03" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TipoCre03" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="SaldoDeu03" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemanJud03" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCast03" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Titular03" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Garante03" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Coddeu03" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TarCre03" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="AcConc03" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr> 
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="FechaCor04" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Insti04" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TipoCre04" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="SaldoDeu04" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemanJud04" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCast04" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Titular04" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Garante04" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Coddeu04" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="TarCre04" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="AcConc04" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>&nbsp;</p>
+        <p style="font-weight:bold;">VALOR ACTUAL DE DEUDA TOTAL REPORTADA EN EL SISTEMA FINANCIERO, REGULADO SB, REGULADO SEPS Y SECTOR COMERCIAL</p>
+        <div class="slds-card__body slds-scrollable">
+          <table id="resultado7" class="slds-table slds-table_bordered slds-table_cell-buffer">
+            <thead>
+              <tr class="slds-line-height_reset">
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Acreedor">Acreedor</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Por Vencer">Por Vencer</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="No Devenga Intereses">No Devenga Intereses</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Vencido">Vencido</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Saldo Deuda">Saldo Deuda</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Demanda Judicial">Demanda Judicial</div>
+                </th>
+                <th class="" scope="col">
+                  <div class="slds-truncate" title="Cartera Castigada">Cartera Castigada</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="Acreedor0" class="slds-input" style="width:350px; border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="PVencer0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="NDevegaInt0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Vencido0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="SalDeud0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemanJudi0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCasti0" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr>   
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="Acreedor1" class="slds-input" style="border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="PVencer1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="NDevegaInt1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Vencido1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="SalDeud1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemanJudi1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCasti1" class="slds-input" style="border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr>
+              <tr class="slds-hint-parent">
+                <th scope="row">
+                  <div class="slds-truncate" title=""><input id="Acreedor02" value="Total" class="slds-input" style="font-weight: bold !important; border:none !important; background-color: transparent !important; margin-left:-10px;" disabled="true"/></div>
+                </th>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="PVencer2" class="slds-input" style="font-weight: bold !important; border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="NDevegaInt2" class="slds-input" style="font-weight: bold !important; border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="Vencido2" class="slds-input" style="font-weight: bold !important; border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="SalDeud2" class="slds-input" style="font-weight: bold !important; border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="DemanJudi2" class="slds-input" style="font-weight: bold !important; border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+                <td role="gridcell">
+                  <div class="slds-truncate" title=""><input id="CarteraCasti2" class="slds-input" style="font-weight: bold !important; border:none !important; background-color: transparent !important;" disabled="true"/></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>  
+      </div>
+    </article>
+  
+  </apex:form>
+  
+  <div class="demo-only slds-hidden" style="height: 4rem;" id="ToastMessage2">
+    <div class="slds-notify_container slds-is-relative">
+      <div class="slds-notify slds-notify_toast slds-theme_error" role="alert">
+        <span class="slds-assistive-text">success</span>
+        <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top" title="Oportunidad Cerrada">
+          <svg class="slds-icon slds-icon_small" aria-hidden="true">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#error')}" />
+          </svg>
+        </span>
+        <div class="slds-notify__content">
+          <h2 class="slds-text-heading_small ">No puede consultar a Equifax desde una Oportunidad en Etapa: Vendida o <br/> No negociada.</h2>
+        </div>
+        <button class="slds-button slds-button_icon slds-notify__close slds-button_icon-inverse" title="Close" onclick='toastLaunch2();'>
+          <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#close')}" />
+          </svg>
+          <span class="slds-assistive-text">Close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  </body>
+
+</html>
+
+</apex:page>
